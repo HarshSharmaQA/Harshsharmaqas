@@ -24,33 +24,55 @@ export function LikeButton({ postId }: LikeButtonProps) {
   const { toast } = useToast();
 
   useEffect(() => {
-    const getLikes = async () => {
-      setIsLoading(true);
+    // Fetch the initial like count, which is public.
+    const getLikeCount = async () => {
       try {
         const likesCol = collection(db, 'blogs', postId, 'likes');
         const snapshot = await getCountFromServer(likesCol);
         setLikes(snapshot.data().count);
-
-        if (user) {
-          const likeDocRef = doc(db, 'blogs', postId, 'likes', user.uid);
-          const likeDoc = await getDoc(likeDocRef);
-          setIsLiked(likeDoc.exists());
-        } else {
-          setIsLiked(false);
-        }
       } catch (error) {
-        console.error("Error fetching likes:", error);
+        console.error("Error fetching like count:", error);
       } finally {
-        setIsLoading(false);
+        // We set loading to false here regardless of user auth status
+        // because the public count has been fetched.
+        if (!user) {
+          setIsLoading(false);
+        }
       }
     };
-    
-    // We only depend on authLoading to trigger the initial fetch.
-    // The user object is checked inside getLikes.
-    if (!authLoading) {
-      getLikes();
+
+    getLikeCount();
+  }, [postId]);
+
+  useEffect(() => {
+    // This effect runs when the user's authentication state is known.
+    if (authLoading) {
+      // Still checking for user, keep loading.
+      setIsLoading(true);
+      return;
     }
-  }, [postId, user, authLoading]);
+
+    if (user) {
+      // User is logged in, now check their like status.
+      const checkUserLike = async () => {
+        setIsLoading(true);
+        const likeDocRef = doc(db, 'blogs', postId, 'likes', user.uid);
+        try {
+          const likeDoc = await getDoc(likeDocRef);
+          setIsLiked(likeDoc.exists());
+        } catch (error) {
+          console.error("Error checking user's like:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      checkUserLike();
+    } else {
+      // User is not logged in, ensure like status is false and stop loading.
+      setIsLiked(false);
+      setIsLoading(false);
+    }
+  }, [user, authLoading, postId]);
 
   const handleLike = async () => {
     if (!user) {
@@ -62,19 +84,19 @@ export function LikeButton({ postId }: LikeButtonProps) {
       return;
     }
     
+    setIsLoading(true);
     const likeRef = doc(db, 'blogs', postId, 'likes', user.uid);
     const wasLiked = isLiked;
 
     // Optimistic UI update
     setIsLiked(!wasLiked);
     setLikes(prev => wasLiked ? prev - 1 : prev + 1);
-    setIsLoading(true);
 
     try {
         if (wasLiked) {
             await deleteDoc(likeRef);
         } else {
-            await setDoc(likeRef, { createdAt: serverTimestamp() });
+            await setDoc(likeRef, { createdAt: serverTimestamp(), userId: user.uid });
         }
     } catch (error) {
        console.error("Error updating like: ", error);
@@ -87,7 +109,7 @@ export function LikeButton({ postId }: LikeButtonProps) {
         description: 'There was a problem processing your request.',
       });
     } finally {
-        // Fetch true count from server to ensure consistency
+        // Fetch true count from server to ensure consistency, then stop loading.
         try {
             const likesCol = collection(db, 'blogs', postId, 'likes');
             const snapshot = await getCountFromServer(likesCol);

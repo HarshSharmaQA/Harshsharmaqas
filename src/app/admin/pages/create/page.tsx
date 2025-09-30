@@ -76,9 +76,9 @@ export default function CreatePage() {
   };
   
   return (
-    <div className="space-y-8">
-       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+    <div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold font-headline">Create Page</h1>
             <Button type="submit" disabled={isSubmitting}>
@@ -87,7 +87,7 @@ export default function CreatePage() {
             </Button>
           </div>
 
-          <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2">
               <Card>

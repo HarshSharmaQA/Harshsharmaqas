@@ -62,15 +62,29 @@ async function getDashboardData(): Promise<DashboardData> {
   // Convert Timestamp to a serializable format (string)
   const recentPosts = blogSnapshot.docs.map(doc => {
       const data = doc.data();
-      const post: any = { 
-          id: doc.id, 
-          ...data,
-          createdAt: data.createdAt ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
+      // Ensure createdAt is handled correctly, even if it's null
+      const createdAt = data.createdAt ? data.createdAt.toDate().toISOString() : new Date().toISOString();
+      const post: BlogPost = {
+        id: doc.id,
+        title: data.title,
+        slug: data.slug,
+        author: data.author,
+        category: data.category,
+        seoDescription: data.seoDescription,
+        createdAt: {
+          toDate: () => new Date(createdAt),
+          // Keep other Timestamp properties if needed, or mock them
+          seconds: data.createdAt ? data.createdAt.seconds : Math.floor(new Date(createdAt).getTime() / 1000),
+          nanoseconds: data.createdAt ? data.createdAt.nanoseconds : 0,
+        },
       };
-      if (data.updatedAt) {
-        post.updatedAt = data.updatedAt.toDate().toISOString();
+      if (data.featureImageUrl) {
+        post.featureImageUrl = data.featureImageUrl;
       }
-      return post as BlogPost;
+       if (data.faqs) {
+        post.faqs = data.faqs;
+      }
+      return post;
   });
 
 
@@ -80,7 +94,7 @@ async function getDashboardData(): Promise<DashboardData> {
 
   // NOTE: Revenue is a simple sum of all course prices.
   // This mock calculation assumes each course is sold once per month for chart data.
-  const totalRevenue = courses.reduce((sum, course) => sum + course.price, 0);
+  const totalRevenue = courses.reduce((sum, course) => sum + (course.price || 0), 0);
 
   // Process sales data for chart
   const monthlySales: { [key: string]: { name: string; sales: number } } = {};
@@ -91,7 +105,7 @@ async function getDashboardData(): Promise<DashboardData> {
       const month = format(d, 'MMM');
       const monthlyTotal = courses.reduce((sum, course) => {
         // simple mock logic to generate varied data
-        return sum + course.price * (i + 1) * (Math.random() * 0.5 + 0.8);
+        return sum + (course.price || 0) * (i + 1) * (Math.random() * 0.5 + 0.8);
       }, 0);
       monthlySales[month] = { name: month, sales: Math.round(monthlyTotal) };
   }
@@ -115,17 +129,21 @@ export function DashboardClient() {
 
   useEffect(() => {
     async function fetchData() {
-      try {
-        const dashboardData = await getDashboardData();
-        setData(dashboardData);
-      } catch (error) {
-        console.error("Failed to fetch dashboard data:", error);
-      } finally {
+      if (!data) { // Only fetch data if it hasn't been fetched yet
+        try {
+          const dashboardData = await getDashboardData();
+          setData(dashboardData);
+        } catch (error) {
+          console.error("Failed to fetch dashboard data:", error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
         setLoading(false);
       }
     }
     fetchData();
-  }, []);
+  }, [data]);
 
   const stats = [
     {
@@ -273,7 +291,7 @@ export function DashboardClient() {
                         <p className="text-sm font-medium leading-tight truncate">{post.title}</p>
                         <p className="text-xs text-muted-foreground">
                             {post.createdAt
-                            ? format(new Date(post.createdAt), 'MMMM d, yyyy')
+                            ? format(post.createdAt.toDate(), 'MMMM d, yyyy')
                             : 'Just now'}
                         </p>
                         </div>

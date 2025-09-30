@@ -30,23 +30,15 @@ const navLinks = [
   { href: '/contact', label: 'Contact' },
 ];
 
-export default function Header() {
+export default function Header({ siteName }: { siteName: string }) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const auth = getAuth(app);
   const [user, loading] = useAuthState(auth);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [siteName, setSiteName] = useState('QAWala');
-
+  
   useEffect(() => {
-    const checkAdminAndSettings = async () => {
-      // Fetch Site Settings
-      const settingsDoc = await getDoc(doc(db, 'settings', 'site'));
-      if (settingsDoc.exists()) {
-        setSiteName(settingsDoc.data().siteName || 'QAWala');
-      }
-
-      // Check User Role
+    const checkAdminRole = async () => {
       if (user) {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists() && userDoc.data().role === 'admin') {
@@ -58,7 +50,7 @@ export default function Header() {
         setIsAdmin(false);
       }
     };
-    checkAdminAndSettings();
+    checkAdminRole();
   }, [user]);
 
   const handleLogout = () => {

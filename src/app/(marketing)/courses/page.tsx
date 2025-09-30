@@ -1,16 +1,14 @@
-'use client';
 
 import Image from 'next/image';
 import Link from 'next/link';
 import { collection, getDocs, query } from 'firebase/firestore';
-import { useState, useEffect } from 'react';
 
 import { db } from '@/lib/firebase';
 import { type Course } from '@/lib/mock-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 async function getCourses(): Promise<Course[]> {
@@ -20,19 +18,8 @@ async function getCourses(): Promise<Course[]> {
     return courseList;
 }
 
-export default function CoursesPage() {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    getCourses().then(fetchedCourses => {
-      setCourses(fetchedCourses);
-      setLoading(false);
-    }).catch(error => {
-      console.error("Error fetching courses: ", error);
-      setLoading(false);
-    });
-  }, []);
+export default async function CoursesPage() {
+  const courses = await getCourses();
 
   return (
     <div className="container py-12">
@@ -41,9 +28,9 @@ export default function CoursesPage() {
         <p className="text-lg text-muted-foreground mt-2">Invest in your skills and grow your career with our expert-led courses.</p>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center items-center py-16">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      {courses.length === 0 ? (
+        <div className="text-center py-16 text-muted-foreground">
+          <p>Courses are being prepared. Check back soon!</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">

@@ -1,14 +1,11 @@
 
-'use client';
-
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Loader2, Linkedin, Twitter, Github, Star } from 'lucide-react';
+import { ArrowRight, Linkedin, Twitter, Github, Star } from 'lucide-react';
 import { collection, getDocs, query, orderBy, limit, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { type BlogPost } from '@/app/admin/blogs/page';
 import { format } from 'date-fns';
-import { useState, useEffect } from 'react';
 import { type Course } from '@/lib/mock-data';
 
 import { Button } from '@/components/ui/button';
@@ -16,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import type { Metadata } from 'next';
 
 type Testimonial = {
   id: string;
@@ -32,6 +30,7 @@ type SiteSettings = {
   socialTwitter: string;
   socialLinkedin: string;
   socialGithub: string;
+  siteName: string;
 };
 
 async function getRecentPosts(): Promise<BlogPost[]> {
@@ -55,42 +54,34 @@ async function getTestimonials(): Promise<Testimonial[]> {
   return testimonialList;
 }
 
+async function getSettings(): Promise<SiteSettings | null> {
+    const docRef = doc(db, 'settings', 'site');
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+        return docSnap.data() as SiteSettings;
+    }
+    return null;
+}
 
-export default function HomePage() {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [settings, setSettings] = useState<SiteSettings | null>(null);
-  
-  const [loading, setLoading] = useState(true);
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSettings();
+  return {
+    title: settings?.siteName || 'QAWala - Expert QA & Testing Resources',
+    description: settings?.heroDescription || 'The #1 destination for QA professionals and aspirants. Enhance your skills with our courses and tools.',
+  };
+}
 
+
+export default async function HomePage() {
+  const [posts, courses, testimonials, settings] = await Promise.all([
+    getRecentPosts(),
+    getFeaturedCourses(),
+    getTestimonials(),
+    getSettings()
+  ]);
 
   const fallbackImage = PlaceHolderImages.find(img => img.id === 'course-detail-banner');
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [postsData, coursesData, testimonialsData, settingsData] = await Promise.all([
-          getRecentPosts(),
-          getFeaturedCourses(),
-          getTestimonials(),
-          getDoc(doc(db, 'settings', 'site'))
-        ]);
-        setPosts(postsData);
-        setCourses(coursesData);
-        setTestimonials(testimonialsData);
-        if (settingsData.exists()) {
-          setSettings(settingsData.data() as SiteSettings);
-        }
-      } catch (error) {
-        console.error("Error fetching homepage data: ", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -150,11 +141,7 @@ export default function HomePage() {
               <p className="text-lg text-muted-foreground mt-2">Kickstart your career with our most popular courses.</p>
             </div>
             
-            {loading ? (
-                <div className="flex justify-center items-center py-16">
-                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                </div>
-            ) : courses.length === 0 ? (
+            {courses.length === 0 ? (
                 <div className="text-center py-16">
                     <h2 className="text-2xl font-headline mb-2">Courses Coming Soon!</h2>
                     <p className="text-muted-foreground">New courses are being prepared. Check back soon!</p>
@@ -212,11 +199,7 @@ export default function HomePage() {
               <h2 className="text-3xl md:text-4xl font-bold font-headline">What People Are Saying</h2>
               <p className="text-lg text-muted-foreground mt-2">Hear from professionals who have grown with QAWala.</p>
             </div>
-            {loading ? (
-                <div className="flex justify-center items-center py-16">
-                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                </div>
-            ) : testimonials.length === 0 ? (
+            {testimonials.length === 0 ? (
                 <div className="text-center py-16 text-muted-foreground">
                     <p>No testimonials yet. Be the first to share your success story!</p>
                 </div>
@@ -268,11 +251,7 @@ export default function HomePage() {
               <p className="text-lg text-muted-foreground mt-2">Check out my newest articles and tutorials.</p>
             </div>
             
-            {loading ? (
-                <div className="flex justify-center items-center py-16">
-                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                </div>
-            ) : posts.length === 0 ? (
+            {posts.length === 0 ? (
                 <div className="text-center py-16">
                     <h2 className="text-2xl font-headline mb-2">No Posts Yet</h2>
                     <p className="text-muted-foreground">The admin hasn't published any posts. Check back soon!</p>

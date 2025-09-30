@@ -7,11 +7,13 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, User } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -21,7 +23,6 @@ import { Bot, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { app, db } from '@/lib/firebase';
 import { Separator } from '@/components/ui/separator';
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address.'),
@@ -29,22 +30,6 @@ const loginSchema = z.object({
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
-
-const ADMIN_EMAIL = 'harshsharmaqa@gmail.com';
-
-// This function can be moved to a shared lib file if used elsewhere
-const createUserDocument = async (user: User) => {
-    const userDocRef = doc(db, 'users', user.uid);
-    const userDoc = await getDoc(userDocRef);
-    if (!userDoc.exists()) {
-      await setDoc(userDocRef, {
-        uid: user.uid,
-        name: user.displayName,
-        email: user.email,
-        joinedAt: serverTimestamp(),
-      });
-    }
-};
 
 export default function LoginPage() {
   const router = useRouter();
@@ -54,15 +39,13 @@ export default function LoginPage() {
   });
 
   const handleLoginSuccess = async (user: User) => {
-    // Ensure a user document exists, especially for Google Sign-In
-    await createUserDocument(user);
-
     toast({
       title: 'Success',
       description: 'Logged in successfully!',
     });
 
-    if (user.email === ADMIN_EMAIL) {
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (userDoc.exists() && userDoc.data().role === 'admin') {
       router.push('/admin');
     } else {
       router.push('/');
@@ -74,6 +57,9 @@ export default function LoginPage() {
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider)
       .then(async (result) => {
+        // This function needs to handle both new and existing users.
+        // We will check for an existing user document in the signup page's version of this function.
+        // For login, we can assume the user exists.
         await handleLoginSuccess(result.user);
       })
       .catch((error) => {

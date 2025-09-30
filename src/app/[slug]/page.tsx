@@ -1,18 +1,16 @@
 
-'use client';
-
-import { useParams, notFound } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { collection, query, where, getDocs, limit, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import type { Metadata } from 'next';
 
 type Page = {
   id: string;
   title: string;
   content: string;
   createdAt: Timestamp;
+  slug: string;
 };
 
 async function getPage(slug: string): Promise<Page | null> {
@@ -27,41 +25,23 @@ async function getPage(slug: string): Promise<Page | null> {
   return { id: pageDoc.id, ...pageDoc.data() } as Page;
 }
 
-export default function CustomPage() {
-  const params = useParams();
-  const slug = params.slug as string;
-  const [page, setPage] = useState<Page | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (slug) {
-      getPage(slug).then(fetchedPage => {
-        if (fetchedPage) {
-          setPage(fetchedPage);
-        } else {
-          // This is how Next.js app router triggers a 404
-          notFound();
-        }
-        setLoading(false);
-      }).catch(error => {
-        console.error("Error fetching page: ", error);
-        setLoading(false);
-        notFound();
-      });
-    }
-  }, [slug]);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    );
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const page = await getPage(params.slug);
+  if (!page) {
+    return {
+      title: 'Page Not Found',
+    };
   }
+  return {
+    title: page.title,
+  };
+}
+
+export default async function CustomPage({ params }: { params: { slug: string } }) {
+  const page = await getPage(params.slug);
 
   if (!page) {
-    // This should be handled by the notFound() in useEffect, but as a fallback
-    return notFound();
+    notFound();
   }
 
   return (

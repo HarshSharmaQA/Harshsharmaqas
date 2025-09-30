@@ -1,16 +1,13 @@
-'use client';
 
-import { useParams, notFound, useRouter } from 'next/navigation';
-import { collection, query, where, getDocs, limit, Timestamp, doc } from 'firebase/firestore';
+import { notFound } from 'next/navigation';
+import { collection, query, where, getDocs, limit, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { format } from 'date-fns';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { useState, useEffect } from 'react';
-import { Loader2, Share2 } from 'lucide-react';
 import { LikeButton } from '@/components/blog/like-button';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
+import { ShareButton } from '@/components/blog/share-button';
+import type { Metadata } from 'next';
 
 type BlogPost = {
   id: string;
@@ -21,6 +18,7 @@ type BlogPost = {
   featureImageUrl?: string;
   author: string;
   createdAt: Timestamp;
+  slug: string;
 };
 
 async function getPost(slug: string): Promise<BlogPost | null> {
@@ -35,63 +33,37 @@ async function getPost(slug: string): Promise<BlogPost | null> {
   return { id: postDoc.id, ...postDoc.data() } as BlogPost;
 }
 
-export default function BlogPostPage() {
-  const params = useParams();
-  const slug = params.slug as string;
-  const [post, setPost] = useState<BlogPost | null>(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
-  const { toast } = useToast();
-
-  useEffect(() => {
-    if (slug) {
-      getPost(slug).then(fetchedPost => {
-        if (fetchedPost) {
-          setPost(fetchedPost);
-          document.title = fetchedPost.seoTitle; // Set document title on client
-        } else {
-          notFound();
-        }
-        setLoading(false);
-      }).catch(error => {
-        console.error("Error fetching post: ", error);
-        setLoading(false);
-      });
-    }
-  }, [slug]);
-
-  const handleShare = async () => {
-    const shareData = {
-      title: post?.title,
-      text: post?.seoDescription,
-      url: window.location.href,
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const post = await getPost(params.slug);
+  if (!post) {
+    return {
+      title: 'Post Not Found',
     };
-    if (navigator.share && navigator.canShare(shareData)) {
-      try {
-        await navigator.share(shareData);
-      } catch (err) {
-        console.error('Error sharing:', err);
-      }
-    } else {
-      // Fallback for browsers that do not support the Web Share API
-      navigator.clipboard.writeText(window.location.href);
-      toast({
-        title: 'Link Copied',
-        description: 'The link to this post has been copied to your clipboard.',
-      });
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    );
   }
+  return {
+    title: post.seoTitle,
+    description: post.seoDescription,
+    openGraph: {
+      title: post.seoTitle,
+      description: post.seoDescription,
+      images: [
+        {
+          url: post.featureImageUrl || PlaceHolderImages.find(img => img.id === 'course-detail-banner')?.imageUrl || '',
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
+    },
+  };
+}
+
+
+export default async function BlogPostPage({ params }: { params: { slug: string } }) {
+  const post = await getPost(params.slug);
 
   if (!post) {
-    return notFound();
+    notFound();
   }
 
   const fallbackImage = PlaceHolderImages.find(img => img.id === 'course-detail-banner');
@@ -106,6 +78,7 @@ export default function BlogPostPage() {
                 fill
                 className="object-cover"
                 data-ai-hint="blog post image"
+                priority
             />
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
             <div className="text-center text-white p-4 max-w-4xl">
@@ -120,9 +93,7 @@ export default function BlogPostPage() {
         <div className="container py-12 md:py-16">
              <div className="max-w-prose mx-auto mb-8 flex items-center justify-end gap-2">
                 <LikeButton postId={post.id} />
-                <Button variant="outline" size="icon" onClick={handleShare}>
-                    <Share2 className="h-4 w-4" />
-                </Button>
+                <ShareButton post={{title: post.title, seoDescription: post.seoDescription}} />
             </div>
             <article className="prose prose-lg dark:prose-invert mx-auto">
                 <div className="whitespace-pre-wrap text-foreground">

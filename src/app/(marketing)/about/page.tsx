@@ -1,47 +1,39 @@
 
-'use client';
-
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import { useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import type { Metadata } from 'next';
 
 type SiteSettings = {
   aboutMeLong: string;
+  siteName: string;
 };
 
-export default function AboutPage() {
-  const [settings, setSettings] = useState<SiteSettings | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  const aboutImage = PlaceHolderImages.find((img) => img.id === 'hero-image');
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const docRef = doc(db, 'settings', 'site');
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setSettings(docSnap.data() as SiteSettings);
-        }
-      } catch (error) {
-        console.error("Error fetching site settings:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchSettings();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    );
+async function getSettings(): Promise<SiteSettings | null> {
+  try {
+    const docRef = doc(db, 'settings', 'site');
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data() as SiteSettings;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching site settings:", error);
+    return null;
   }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSettings();
+  return {
+    title: `About | ${settings?.siteName || 'QAWala'}`,
+  };
+}
+
+export default async function AboutPage() {
+  const settings = await getSettings();
+  const aboutImage = PlaceHolderImages.find((img) => img.id === 'hero-image');
 
   return (
     <div className="container py-12 md:py-20">

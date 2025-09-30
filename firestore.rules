@@ -1,3 +1,4 @@
+
 rules_version = '2';
 
 // The admin UID. All admin actions will be checked against this UID.
@@ -39,13 +40,6 @@ service cloud.firestore {
     match /blogs/{blogId} {
       allow read: if true;
       allow write: if isAdmin();
-
-      // Likes subcollection
-      match /likes/{userId} {
-        allow get: if isAuth(); // Allow authenticated users to get their own like status
-        allow create, delete: if isAuth() && request.auth.uid == userId; // Allow user to manage their own like
-        allow list, update: if false; // Deny listing all likes or updating (only create/delete)
-      }
     }
 
     // Courses can be read by anyone.
@@ -74,11 +68,6 @@ service cloud.firestore {
     match /settings/site {
       allow read: if true;
       allow write: if isAdmin();
-    }
-
-    // Lock down any other collections by default
-    match /{document=**} {
-      allow read, write: if false;
     }
   }
 }

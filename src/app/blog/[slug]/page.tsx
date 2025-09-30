@@ -5,7 +5,6 @@ import { db } from '@/lib/firebase';
 import { format } from 'date-fns';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { LikeButton } from '@/components/blog/like-button';
 import { ShareButton } from '@/components/blog/share-button';
 import type { Metadata } from 'next';
 
@@ -93,7 +92,6 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
 
         <div className="container py-12 md:py-16">
              <div className="max-w-prose mx-auto mb-8 flex items-center justify-end gap-2">
-                <LikeButton postId={post.id} />
                 <ShareButton post={{title: post.title, seoDescription: post.seoDescription}} />
             </div>
             <article className="prose prose-lg dark:prose-invert mx-auto">

@@ -81,123 +81,122 @@ export default function CreatePage() {
   };
   
   return (
-    <div className="space-y-8">
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold font-headline">Create Page</h1>
-            <Button onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isSubmitting ? 'Publishing...' : 'Publish Page'}
             </Button>
         </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+              <Card>
+              <CardHeader>
+                  <CardTitle>Page Content</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                  <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                      <FormItem>
+                      <FormLabel>Title</FormLabel>
+                      <FormControl>
+                          <Input placeholder="Your page title" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                      </FormItem>
+                  )}
+                  />
+                  <FormField
+                  control={form.control}
+                  name="content"
+                  render={({ field }) => (
+                      <FormItem>
+                      <FormLabel>Content</FormLabel>
+                      <FormControl>
+                          <Textarea placeholder="Write your page content here. Basic HTML is supported." {...field} rows={25} />
+                      </FormControl>
+                      <FormDescription>
+                          You can use basic HTML tags like `<h1>`, `<p>`, `<b>`, etc. for formatting.
+                      </FormDescription>
+                      <FormMessage />
+                      </FormItem>
+                  )}
+                  />
+              </CardContent>
+              </Card>
+          </div>
 
-        <Form {...form}>
-            <form className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6">
-                <Card>
-                <CardHeader>
-                    <CardTitle>Page Content</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Title</FormLabel>
-                        <FormControl>
-                            <Input placeholder="Your page title" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-                    <FormField
-                    control={form.control}
-                    name="content"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Content</FormLabel>
-                        <FormControl>
-                            <Textarea placeholder="Write your page content here. Basic HTML is supported." {...field} rows={25} />
-                        </FormControl>
-                        <FormDescription>
-                            You can use basic HTML tags like `<h1>`, `<p>`, `<b>`, etc. for formatting.
-                        </FormDescription>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-                </CardContent>
-                </Card>
-            </div>
-
-            <div className="space-y-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Page Settings</CardTitle>
-                        <CardDescription>Manage visibility and access for this page.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <FormField
-                        control={form.control}
-                        name="slug"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>URL Slug</FormLabel>
-                            <div className="flex items-center gap-2">
-                                <FormControl>
-                                <Input placeholder="your-page-slug" {...field} />
-                                </FormControl>
-                                <Button type="button" variant="outline" size="sm" onClick={generateSlug}>Generate</Button>
-                            </div>
-                            <FormDescription>The unique URL path for this page.</FormDescription>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                        <FormField
-                        control={form.control}
-                        name="status"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Status</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select a status" />
-                                </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                <SelectItem value="draft">Draft</SelectItem>
-                                <SelectItem value="published">Published</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormDescription>Draft pages are not visible to the public.</FormDescription>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                        <FormField
-                        control={form.control}
-                        name="password"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Password Protection</FormLabel>
-                            <FormControl>
-                                <Input type="password" placeholder="Leave blank for no password" {...field} value={field.value || ''}/>
-                            </FormControl>
-                            <FormDescription>
-                                Require a password to view this page.
-                            </FormDescription>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                    </CardContent>
-                </Card>
-            </div>
-            </form>
-        </Form>
-    </div>
+          <div className="space-y-6">
+              <Card>
+                  <CardHeader>
+                      <CardTitle>Page Settings</CardTitle>
+                      <CardDescription>Manage visibility and access for this page.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                      <FormField
+                      control={form.control}
+                      name="slug"
+                      render={({ field }) => (
+                          <FormItem>
+                          <FormLabel>URL Slug</FormLabel>
+                          <div className="flex items-center gap-2">
+                              <FormControl>
+                              <Input placeholder="your-page-slug" {...field} />
+                              </FormControl>
+                              <Button type="button" variant="outline" size="sm" onClick={generateSlug}>Generate</Button>
+                          </div>
+                          <FormDescription>The unique URL path for this page.</FormDescription>
+                          <FormMessage />
+                          </FormItem>
+                      )}
+                      />
+                      <FormField
+                      control={form.control}
+                      name="status"
+                      render={({ field }) => (
+                          <FormItem>
+                          <FormLabel>Status</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                              <SelectTrigger>
+                                  <SelectValue placeholder="Select a status" />
+                              </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                              <SelectItem value="draft">Draft</SelectItem>
+                              <SelectItem value="published">Published</SelectItem>
+                              </SelectContent>
+                          </Select>
+                          <FormDescription>Draft pages are not visible to the public.</FormDescription>
+                          <FormMessage />
+                          </FormItem>
+                      )}
+                      />
+                      <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                          <FormItem>
+                          <FormLabel>Password Protection</FormLabel>
+                          <FormControl>
+                              <Input type="password" placeholder="Leave blank for no password" {...field} value={field.value || ''}/>
+                          </FormControl>
+                          <FormDescription>
+                              Require a password to view this page.
+                          </FormDescription>
+                          <FormMessage />
+                          </FormItem>
+                      )}
+                      />
+                  </CardContent>
+              </Card>
+          </div>
+        </div>
+      </form>
+    </Form>
   );
 }

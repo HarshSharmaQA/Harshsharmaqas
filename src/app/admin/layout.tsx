@@ -10,7 +10,6 @@ import { app } from '@/lib/firebase';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import AdminSidebar from '@/components/admin/admin-sidebar';
 import { Loader2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 
 const ADMIN_EMAIL = 'harshsharmaqa@gmail.com';
 
@@ -18,7 +17,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const auth = getAuth(app);
   const [user, loading] = useAuthState(auth);
   const router = useRouter();
-  const { toast } = useToast();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
 
@@ -34,15 +32,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     if (user.email === ADMIN_EMAIL) {
       setIsAdmin(true);
     } else {
-      toast({
-        variant: 'destructive',
-        title: 'Access Denied',
-        description: 'You do not have permission to access the admin area.',
-      });
+      // Non-admin users are redirected away. A toast is not critical here.
       router.replace('/');
     }
     setIsChecking(false);
-  }, [user, loading, router, toast]);
+  }, [user, loading, router]);
 
   if (loading || isChecking) {
     return (
@@ -53,6 +47,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   }
 
   if (!isAdmin) {
+    // This state is temporary while router.replace('/') is processed.
+    // A loading indicator is appropriate.
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />

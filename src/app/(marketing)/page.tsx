@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowRight, Loader2, Linkedin, Twitter, Github } from 'lucide-react';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { type BlogPost } from '@/app/admin/blogs/page';
@@ -24,6 +24,7 @@ export default function HomePage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const fallbackImage = PlaceHolderImages.find(img => img.id === 'course-detail-banner');
+  const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
 
   useEffect(() => {
     getRecentPosts().then(fetchedPosts => {
@@ -39,30 +40,58 @@ export default function HomePage() {
     <div className="flex flex-col min-h-screen">
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="py-20 md:py-32 bg-card">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4">
-              Welcome to QAWala
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-              Insights, tutorials, and news from the QAWala team. Your #1 destination for QA content.
-            </p>
-            <div className="flex justify-center gap-4">
-              <Button size="lg" asChild>
-                <Link href="/courses">
-                  Explore Courses
-                </Link>
-              </Button>
+        <section className="py-20 md:py-32">
+          <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div className="order-2 md:order-1">
+              <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4">
+                Harsh Sharma
+              </h1>
+              <p className="text-lg md:text-xl text-muted-foreground mb-6">
+                Software Development Engineer In Test (SDET)
+              </p>
+              <p className="text-muted-foreground mb-8">
+                I write about testing, development, and career growth. Join me on a journey to build better software.
+              </p>
+              <div className="flex items-center gap-4">
+                <Button size="lg" asChild>
+                  <Link href="/blog">
+                    Read The Blog <ArrowRight className="ml-2" />
+                  </Link>
+                </Button>
+                <div className="flex items-center gap-2">
+                   <Button variant="outline" size="icon" asChild>
+                     <Link href="#"><Linkedin /></Link>
+                   </Button>
+                   <Button variant="outline" size="icon" asChild>
+                     <Link href="#"><Twitter /></Link>
+                   </Button>
+                   <Button variant="outline" size="icon" asChild>
+                     <Link href="#"><Github /></Link>
+                   </Button>
+                </div>
+              </div>
+            </div>
+             <div className="order-1 md:order-2 flex justify-center">
+              {heroImage && (
+                <Image
+                  src={heroImage.imageUrl}
+                  alt="Harsh Sharma"
+                  width={350}
+                  height={350}
+                  className="rounded-full object-cover aspect-square shadow-2xl"
+                  data-ai-hint={heroImage.imageHint}
+                />
+              )}
             </div>
           </div>
         </section>
 
         {/* Blog Section */}
-        <section id="latest-posts" className="py-16 md:py-24">
+        <section id="latest-posts" className="py-16 md:py-24 bg-card">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold font-headline">Latest Posts</h2>
-              <p className="text-lg text-muted-foreground mt-2">Check out our newest articles and tutorials.</p>
+              <p className="text-lg text-muted-foreground mt-2">Check out my newest articles and tutorials.</p>
             </div>
             
             {loading ? (
@@ -79,7 +108,7 @@ export default function HomePage() {
                 {posts.map((post) => {
                     const imageUrl = post.featureImageUrl || fallbackImage?.imageUrl || "https://picsum.photos/seed/blog/400/250";
                     return (
-                        <Card key={post.id} className="flex flex-col shadow-md hover:shadow-xl transition-shadow duration-300 group">
+                        <Card key={post.id} className="flex flex-col shadow-md hover:shadow-xl transition-shadow duration-300 group bg-background">
                             <Link href={`/blog/${post.slug}`} className="block overflow-hidden rounded-t-lg">
                             <Image
                                 src={imageUrl}

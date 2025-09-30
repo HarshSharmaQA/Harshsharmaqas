@@ -2,9 +2,9 @@
   "placeholderImages": [
     {
       "id": "hero-image",
-      "description": "A vibrant, abstract representation of data and quality assurance processes.",
-      "imageUrl": "https://images.unsplash.com/photo-1642516303080-431f6681f864?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxhYnN0cmFjdCUyMGRhdGF8ZW58MHx8fHwxNzU5MjA5MDQwfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "abstract data"
+      "description": "A professional portrait of a software developer.",
+      "imageUrl": "https://images.unsplash.com/photo-1614502543953-686941ea07a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxtYW4lMjBzbWlsaW5nJTIwcHJvZmVzc2lvbmFsfGVufDB8fHx8MTc1OTM4MjExMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man smiling"
     },
     {
       "id": "feature-paraphraser",

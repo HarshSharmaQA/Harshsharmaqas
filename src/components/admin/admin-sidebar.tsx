@@ -24,6 +24,7 @@ import { app, db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '../ui/skeleton';
+import { Badge } from '../ui/badge';
 
 // Dynamically import icons to reduce chunk size
 const Bot = dynamic(() => import('lucide-react').then(mod => mod.Bot));
@@ -57,6 +58,7 @@ const menuItems = [
 type UserProfile = {
   name: string;
   email: string;
+  role: 'admin' | 'user';
 }
 
 export default function AdminSidebar() {
@@ -145,8 +147,11 @@ export default function AdminSidebar() {
                 <AvatarImage src={user?.photoURL || "https://picsum.photos/seed/admin/100/100"} data-ai-hint="person portrait" />
                 <AvatarFallback>{userProfile?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
-            <div className={cn("flex-grow", state === 'collapsed' && 'hidden')}>
-                <p className="font-semibold truncate">{userProfile?.name || 'Admin User'}</p>
+            <div className={cn("flex-grow overflow-hidden", state === 'collapsed' && 'hidden')}>
+                <div className="flex items-center gap-2">
+                    <p className="font-semibold truncate">{userProfile?.name || 'Admin User'}</p>
+                    {userProfile?.role && <Badge variant={userProfile.role === 'admin' ? 'destructive' : 'secondary'} className="capitalize">{userProfile.role}</Badge>}
+                </div>
                 <p className="text-xs text-muted-foreground truncate">{userProfile?.email}</p>
             </div>
          </div>

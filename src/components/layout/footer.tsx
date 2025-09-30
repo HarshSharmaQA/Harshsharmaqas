@@ -1,9 +1,6 @@
 
-'use client';
-
 import Link from 'next/link';
 import { Bot, Twitter, Github, Linkedin } from 'lucide-react';
-import { useState, useEffect } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
@@ -14,19 +11,21 @@ type SiteSettings = {
   siteName: string;
 };
 
-export default function Footer() {
-  const [settings, setSettings] = useState<SiteSettings | null>(null);
+async function getSettings(): Promise<SiteSettings | null> {
+  try {
+    const docRef = doc(db, 'settings', 'site');
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data() as SiteSettings;
+    }
+  } catch (error) {
+    console.error("Error fetching site settings for footer:", error);
+  }
+  return null;
+}
 
-  useEffect(() => {
-    const fetchSettings = async () => {
-      const docRef = doc(db, 'settings', 'site');
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setSettings(docSnap.data() as SiteSettings);
-      }
-    };
-    fetchSettings();
-  }, []);
+export default async function Footer() {
+  const settings = await getSettings();
 
   return (
     <footer className="bg-card border-t">

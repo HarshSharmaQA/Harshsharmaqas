@@ -11,19 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
-
-type BlogPost = {
-  id: string;
-  title: string;
-  content: string;
-  seoTitle: string;
-  seoDescription: string;
-  featureImageUrl?: string;
-  author: string;
-  category: string;
-  createdAt: Timestamp;
-  slug: string;
-};
+import { type BlogPost } from '@/app/admin/blogs/page';
+import loading from './loading';
 
 async function getPost(slug: string): Promise<BlogPost | null> {
   const q = query(collection(db, 'blogs'), where('slug', '==', slug), limit(1));

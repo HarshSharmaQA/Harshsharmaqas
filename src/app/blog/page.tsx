@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { collection, getDocs, orderBy, query, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,10 +14,7 @@ type BlogPost = {
   slug: string;
   seoDescription: string;
   featureImageUrl?: string;
-  createdAt: {
-    seconds: number;
-    nanoseconds: number;
-  };
+  createdAt: Timestamp;
 };
 
 async function getBlogPosts(): Promise<BlogPost[]> {
@@ -51,19 +48,23 @@ export default async function BlogPage() {
                 return (
               <Card key={post.id} className="flex flex-col shadow-md hover:shadow-xl transition-shadow duration-300 group">
                 <div className="overflow-hidden rounded-t-lg">
-                  <Image
-                    src={imageUrl}
-                    alt={post.title}
-                    width={400}
-                    height={250}
-                    className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-105"
-                    data-ai-hint="blog post image"
-                  />
+                   <Link href={`/blog/${post.slug}`}>
+                    <Image
+                      src={imageUrl}
+                      alt={post.title}
+                      width={400}
+                      height={250}
+                      className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-105"
+                      data-ai-hint="blog post image"
+                    />
+                  </Link>
                 </div>
                 <CardHeader>
-                  <CardTitle className="font-headline text-xl h-16">{post.title}</CardTitle>
+                  <CardTitle className="font-headline text-xl h-16">
+                    <Link href={`/blog/${post.slug}`}>{post.title}</Link>
+                  </CardTitle>
                   <CardDescription>
-                    {post.createdAt ? format(new Date(post.createdAt.seconds * 1000), 'MMMM d, yyyy') : ''}
+                    {post.createdAt ? format(post.createdAt.toDate(), 'MMMM d, yyyy') : ''}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex-grow flex flex-col">

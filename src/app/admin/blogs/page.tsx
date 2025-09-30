@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { collection, onSnapshot, deleteDoc, doc, orderBy, query } from 'firebase/firestore';
+import { collection, onSnapshot, deleteDoc, doc, orderBy, query, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -46,10 +46,9 @@ export type BlogPost = {
   title: string;
   slug: string;
   author: string;
-  createdAt: {
-    seconds: number;
-    nanoseconds: number;
-  };
+  seoDescription: string;
+  featureImageUrl?: string;
+  createdAt: Timestamp;
 };
 
 export default function AdminBlogsPage() {
@@ -113,7 +112,7 @@ export default function AdminBlogsPage() {
                   <TableCell className="font-medium">{post.title}</TableCell>
                   <TableCell>{post.author}</TableCell>
                   <TableCell>
-                    {post.createdAt ? format(new Date(post.createdAt.seconds * 1000), 'PPP') : 'N/A'}
+                    {post.createdAt ? format(post.createdAt.toDate(), 'PPP') : 'N/A'}
                   </TableCell>
                   <TableCell>
                     <AlertDialog>

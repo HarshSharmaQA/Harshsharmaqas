@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { collection, query, where, getDocs, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { format } from 'date-fns';
 import Image from 'next/image';
@@ -12,10 +12,7 @@ type BlogPost = {
   seoDescription: string;
   featureImageUrl?: string;
   author: string;
-  createdAt: {
-    seconds: number;
-    nanoseconds: number;
-  };
+  createdAt: Timestamp;
 };
 
 async function getPost(slug: string): Promise<BlogPost | null> {
@@ -54,7 +51,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
             <div className="text-center text-white p-4 max-w-4xl">
                 <h1 className="text-4xl md:text-6xl font-bold font-headline">{post.title}</h1>
                 <p className="text-lg mt-4">
-                    By {post.author} on {format(new Date(post.createdAt.seconds * 1000), 'MMMM d, yyyy')}
+                    By {post.author} on {format(post.createdAt.toDate(), 'MMMM d, yyyy')}
                 </p>
             </div>
             </div>

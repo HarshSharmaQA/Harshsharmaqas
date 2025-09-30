@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -20,6 +20,7 @@ import { Label } from '@/components/ui/label';
 import { Bot, Loader2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { app } from '@/lib/firebase';
+import { Separator } from '@/components/ui/separator';
 
 const signupSchema = z.object({
   name: z.string().min(1, 'Name is required.'),
@@ -35,6 +36,25 @@ export default function SignupPage() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
   });
+
+  const handleGoogleSignIn = async () => {
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+       toast({
+        title: 'Account Created',
+        description: "You're now logged in.",
+      });
+      router.push('/admin');
+    } catch (error: any) {
+       toast({
+        variant: 'destructive',
+        title: 'Sign Up Failed',
+        description: error.message,
+      });
+    }
+  };
 
   const onSubmit = async (data: SignupFormValues) => {
     const auth = getAuth(app);
@@ -68,7 +88,7 @@ export default function SignupPage() {
           <CardTitle className="text-2xl font-headline">Create an Account</CardTitle>
           <CardDescription>Start your journey with QAWala today.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="grid gap-4">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
@@ -87,9 +107,17 @@ export default function SignupPage() {
             </div>
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isSubmitting ? 'Creating Account...' : 'Create Account'}
+              {isSubmitting ? 'Creating Account...' : 'Create Account with Email'}
             </Button>
           </form>
+          <div className="relative">
+            <Separator />
+            <p className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-2 bg-card text-muted-foreground text-sm">OR</p>
+          </div>
+           <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
+             <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 126 21.2 173.4 58.2L359.3 127.1c-24.3-23.8-58.2-38.2-97.3-38.2-74.6 0-135.3 60.7-135.3 135.3s60.7 135.3 135.3 135.3c82.3 0 119.4-49.3 123.4-74.6H248v-90.2h239.2c1.2 12.8 1.8 26.9 1.8 42.8z"></path></svg>
+            Sign up with Google
+          </Button>
         </CardContent>
         <CardFooter>
           <div className="text-center text-sm w-full">

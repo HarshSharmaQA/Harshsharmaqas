@@ -12,8 +12,10 @@ import { Loader2 } from 'lucide-react';
 export default function MarketingLayout({ children }: { children: ReactNode }) {
   const [siteName, setSiteName] = useState('QAWala');
   const [loading, setLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
     const fetchSettings = async () => {
       try {
         const docRef = doc(db, 'settings', 'site');
@@ -40,7 +42,7 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
     fetchSettings();
   }, []);
   
-  if (loading) {
+  if (loading && isClient) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />

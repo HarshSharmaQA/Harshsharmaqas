@@ -39,42 +39,39 @@ export default function SignupPage() {
     resolver: zodResolver(signupSchema),
   });
 
-  const createUserDocument = async (user: User, isNewUser: boolean = false) => {
-    if (!isNewUser) return; // Only run for new signups
-
+  const createUserDocument = async (user: User) => {
     const userDocRef = doc(db, 'users', user.uid);
-    let role = 'user';
+    const userDoc = await getDoc(userDocRef);
 
-    // Assign 'admin' role to the specified email
-    if (user.email === 'harshsharmaqa@gmail.com') {
-      role = 'admin';
-    } else {
-      // For other users, check if they are the first user
+    // Only create a new document if one doesn't already exist.
+    if (!userDoc.exists()) {
+      let role = 'user';
+      // Check if this is the very first user signing up.
       const usersCollectionRef = collection(db, 'users');
       const firstUserQuery = query(usersCollectionRef, limit(1));
       const snapshot = await getDocs(firstUserQuery);
+      // If there are no users, this person becomes an admin.
       if (snapshot.empty) {
         role = 'admin';
       }
+
+      await setDoc(userDocRef, {
+        uid: user.uid,
+        name: user.displayName,
+        email: user.email,
+        role: role,
+        joinedAt: serverTimestamp(),
+      });
     }
-    
-    await setDoc(userDocRef, {
-      uid: user.uid,
-      name: user.displayName,
-      email: user.email,
-      role: role,
-      joinedAt: serverTimestamp(),
-    });
   };
 
-  const handleLoginSuccess = async (user: User, isNewUser: boolean) => {
-    if (isNewUser) {
-        await createUserDocument(user, isNewUser);
-    }
+  const handleLoginSuccess = async (user: User) => {
+    // We create the user document here to handle both email and Google sign-up flows.
+    await createUserDocument(user);
     
     toast({
       title: 'Success',
-      description: isNewUser ? 'Account created and logged in!' : 'Logged in successfully!',
+      description: 'Logged in successfully!',
     });
 
     const userDoc = await getDoc(doc(db, 'users', user.uid));
@@ -90,12 +87,7 @@ export default function SignupPage() {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-      // We need to check if the user document already exists before calling handleLoginSuccess
-      const userDocRef = doc(db, 'users', result.user.uid);
-      const userDoc = await getDoc(userDocRef);
-      const isNewUser = !userDoc.exists();
-      
-      await handleLoginSuccess(result.user, isNewUser);
+      await handleLoginSuccess(result.user);
     } catch (error: any) {
        toast({
         variant: 'destructive',
@@ -112,14 +104,9 @@ export default function SignupPage() {
       await updateProfile(userCredential.user, {
         displayName: data.name
       });
-      // Now create the user document in Firestore
-      await createUserDocument(userCredential.user, true);
+      // Now handle the login success which includes creating the user document.
+      await handleLoginSuccess(userCredential.user);
 
-      toast({
-        title: "Account Created",
-        description: "You can now log in.",
-      });
-      router.push('/login');
     } catch (error: any) {
       toast({
         variant: "destructive",

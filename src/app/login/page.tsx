@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -56,6 +57,9 @@ export default function LoginPage() {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
+      // This function needs to handle both new and existing users.
+      // We will check for an existing user document in the signup page's version of this function.
+      // For login, we can assume the user exists.
       await handleLoginSuccess(result.user);
     } catch (error: any) {
        toast({

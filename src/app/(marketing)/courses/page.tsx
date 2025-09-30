@@ -1,0 +1,57 @@
+import Image from 'next/image';
+import Link from 'next/link';
+
+import { courses } from '@/lib/mock-data';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+export default function CoursesPage() {
+  return (
+    <div className="container py-12">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl md:text-5xl font-bold font-headline">Our Courses</h1>
+        <p className="text-lg text-muted-foreground mt-2">Invest in your skills and grow your career with our expert-led courses.</p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {courses.map((course) => {
+          const courseImage = PlaceHolderImages.find((img) => img.id === course.imageId);
+          return (
+            <Card key={course.id} className="overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col group">
+              {courseImage && (
+                <div className="overflow-hidden">
+                    <Image
+                      src={courseImage.imageUrl}
+                      alt={course.title}
+                      width={400}
+                      height={250}
+                      className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-105"
+                      data-ai-hint={courseImage.imageHint}
+                    />
+                </div>
+              )}
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                    <Badge variant="secondary" className="capitalize">{course.level}</Badge>
+                    <p className="text-lg font-bold text-primary">${course.price}</p>
+                </div>
+                <CardTitle className="font-headline pt-2 h-16">{course.title}</CardTitle>
+              </CardHeader>
+              <CardContent className="flex-grow flex flex-col">
+                <p className="text-muted-foreground text-sm mb-4 flex-grow">{course.description}</p>
+                <Button variant="outline" asChild className="w-full mt-auto">
+                  <Link href={`/courses/${course.slug}`}>
+                    View Details <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

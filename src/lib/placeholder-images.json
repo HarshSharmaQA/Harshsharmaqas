@@ -1,3 +1,82 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-image",
+      "description": "A vibrant, abstract representation of data and quality assurance processes.",
+      "imageUrl": "https://images.unsplash.com/photo-1642516303080-431f6681f864?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxhYnN0cmFjdCUyMGRhdGF8ZW58MHx8fHwxNzU5MjA5MDQwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract data"
+    },
+    {
+      "id": "feature-paraphraser",
+      "description": "Icon for content paraphraser feature.",
+      "imageUrl": "https://images.unsplash.com/photo-1645744903558-a42fe12a1984?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx0ZXh0JTIwZG9jdW1lbnR8ZW58MHx8fHwxNzU5MjA4MjA2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "text document"
+    },
+    {
+      "id": "feature-rank-tracking",
+      "description": "Icon for keyword rank tracking feature.",
+      "imageUrl": "https://images.unsplash.com/photo-1730382624761-af8112d26209?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxncmFwaCUyMGNoYXJ0fGVufDB8fHx8MTc1OTE5NjIwNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "graph chart"
+    },
+    {
+      "id": "feature-seo-audit",
+      "description": "Icon for SEO audit tool feature.",
+      "imageUrl": "https://images.unsplash.com/photo-1516382799247-87df95d790b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYWduaWZ5aW5nJTIwZ2xhc3N8ZW58MHx8fHwxNzU5MTY0NjU1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "magnifying glass"
+    },
+    {
+      "id": "testimonial-1",
+      "description": "Profile picture of a satisfied user.",
+      "imageUrl": "https://images.unsplash.com/photo-1521119989659-a83eee488004?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cGVyc29uJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzU5MjA5NTk2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "testimonial-2",
+      "description": "Profile picture of another satisfied user.",
+      "imageUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3b21hbiUyMHNtaWxpbmd8ZW58MHx8fHwxNzU5MTA5ODM0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman smiling"
+    },
+    {
+      "id": "testimonial-3",
+      "description": "Profile picture of a professional QA tester.",
+      "imageUrl": "https://images.unsplash.com/photo-1706645571146-8684302501a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxtYW4lMjBwcm9mZXNzaW9uYWx8ZW58MHx8fHwxNzU5MTk3NDY3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man professional"
+    },
+    {
+      "id": "course-1-thumb",
+      "description": "Thumbnail for Manual Testing course.",
+      "imageUrl": "https://images.unsplash.com/photo-1579642984417-0c00620f8e94?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxjaGVja2xpc3QlMjBjbGlwYm9hcmR8ZW58MHx8fHwxNzU5MTQ3NjEyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "checklist clipboard"
+    },
+    {
+      "id": "course-2-thumb",
+      "description": "Thumbnail for Automation Testing with Selenium course.",
+      "imageUrl": "https://images.unsplash.com/photo-1603356033288-acfcb54801e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxyb2JvdCUyMGNvZGV8ZW58MHx8fHwxNzU5MTUwNjc3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "robot code"
+    },
+    {
+      "id": "course-3-thumb",
+      "description": "Thumbnail for API Testing with Postman course.",
+      "imageUrl": "https://images.unsplash.com/photo-1743385779431-45d26d9775b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxhcGklMjBkYXRhYmFzZXxlbnwwfHx8fDE3NTkyMTE5NjV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "api database"
+    },
+    {
+      "id": "course-4-thumb",
+      "description": "Thumbnail for Performance Testing with JMeter course.",
+      "imageUrl": "https://images.unsplash.com/photo-1719929831748-7fe6b8c84306?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxzcGVlZG9tZXRlciUyMGNoYXJ0fGVufDB8fHx8MTc1OTIxMTk2NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "speedometer chart"
+    },
+    {
+      "id": "course-detail-banner",
+      "description": "Banner image for a course detail page.",
+      "imageUrl": "https://images.unsplash.com/photo-1513258496099-48168024aec0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxsZWFybmluZyUyMG9ubGluZXxlbnwwfHx8fDE3NTkxNTczMDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "learning online"
+    },
+    {
+      "id": "instructor-avatar",
+      "description": "Avatar for a course instructor.",
+      "imageUrl": "https://images.unsplash.com/photo-1758685848208-e108b6af94cc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHx0ZWFjaGVyJTIwcHJvZmVzc2lvbmFsfGVufDB8fHx8MTc1OTIxMTk2Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "teacher professional"
+    }
+  ]
 }

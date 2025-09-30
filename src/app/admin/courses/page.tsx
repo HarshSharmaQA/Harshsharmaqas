@@ -18,7 +18,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { type Course } from '@/lib/mock-data';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, PlusCircle } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +29,7 @@ import {
 import { useEffect, useState } from 'react';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import Link from 'next/link';
 
 export default function AdminCoursesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -48,7 +49,12 @@ export default function AdminCoursesPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold font-headline">Manage Courses</h1>
-        <Button>Add New Course</Button>
+        <Button asChild>
+          <Link href="/admin/courses/create">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add New Course
+          </Link>
+        </Button>
       </div>
       <Card>
         <CardHeader>

@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, collection } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 const enrollSchema = z.object({
@@ -49,10 +49,12 @@ export function EnrollDialog({ isOpen, onOpenChange, onEnrollmentSuccess, course
 
   const onSubmit = async (values: EnrollFormValues) => {
     try {
-      await addDoc(collection(db, 'enrollments'), {
-        ...values,
-        courseTitle,
-        courseSlug,
+      // Create a document with the user's email as the ID for uniqueness within the subcollection
+      const enrollmentRef = doc(collection(db, 'courses', courseSlug, 'enrollments'), values.email);
+      
+      await setDoc(enrollmentRef, {
+        name: values.name,
+        email: values.email,
         enrolledAt: serverTimestamp(),
       });
 

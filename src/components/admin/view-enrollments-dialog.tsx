@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/table';
 import { db } from '@/lib/firebase';
 import { type Course } from '@/lib/mock-data';
-import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
+import { collection, query, onSnapshot, Timestamp, orderBy } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { Loader2 } from 'lucide-react';
@@ -41,13 +41,11 @@ export function ViewEnrollmentsDialog({ isOpen, onOpenChange, course }: ViewEnro
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !course.slug) return;
 
     setLoading(true);
-    const q = query(
-      collection(db, 'enrollments'),
-      where('courseSlug', '==', course.slug)
-    );
+    const enrollmentsCollectionRef = collection(db, 'courses', course.slug, 'enrollments');
+    const q = query(enrollmentsCollectionRef, orderBy('enrolledAt', 'desc'));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const enrollmentsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Enrollment));

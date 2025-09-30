@@ -1,52 +1,37 @@
 
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
     // Helper functions
-    function isSignedIn() {
-      return request.auth != null;
+    function isAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // Default deny all reads and writes
-    match /{document=**} {
-      allow read, write: if false;
-    }
-
-    // Allow public read on content collections
-    match /blogs/{blogId} {
-      allow get, list: if true;
-      allow write: if false; // Add admin check for production
-    }
-    match /courses/{courseId} {
-      allow get, list: if true;
-      allow write: if false; // Add admin check for production
-    }
-    match /pages/{pageId} {
-        allow get, list: if true;
-        allow write: if false; // Add admin check for production
-    }
-    match /settings/{settingId} {
-      allow get, list: if true;
-      allow write: if false; // Add admin check for production
-    }
-    match /testimonials/{testimonialId} {
-        allow get, list: if true;
-        allow write: if false; // Add admin check for production
-    }
-
-    // Allow anyone to submit an enrollment form
-    match /enrollments/{enrollmentId} {
-        allow create: if true;
-        allow read, update, delete: if false; // Add admin check for production
+    // Publicly readable collections
+    match /{collection}/{doc} 
+      where collection in ['blogs', 'courses', 'pages', 'settings', 'testimonials'] {
+      allow read: if true;
+      allow write: if request.auth != null && isAdmin();
     }
     
-    // Users can only be created if signed in, and can only edit their own user document
+    // Enrollments subcollection
+    match /courses/{courseId}/enrollments/{enrollmentId} {
+      // Anyone can enroll in a course
+      allow create: if true; 
+      // Only admins can see who is enrolled
+      allow read, list, delete: if request.auth != null && isAdmin();
+    }
+    
+    // User collection rules
     match /users/{userId} {
-      allow read: if true;
-      allow create: if isSignedIn() && request.auth.uid == userId;
-      allow update: if isSignedIn() && request.auth.uid == userId;
-      allow delete: if false; // Add admin check for production
+        // Any authenticated user can create their own user document
+        allow create: if request.auth != null;
+        // Only the user themselves or an admin can read/update their own document
+        allow read, update: if request.auth.uid == userId || (request.auth != null && isAdmin());
+        // Only admins can delete user documents
+        allow delete: if request.auth != null && isAdmin();
     }
   }
 }

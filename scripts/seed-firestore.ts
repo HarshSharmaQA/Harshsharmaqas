@@ -18,9 +18,8 @@ const firebaseConfig = {
 // Check for missing config values
 for (const [key, value] of Object.entries(firebaseConfig)) {
     if (!value) {
-        console.error(`Error: Missing Firebase config value for ${key}`);
-        console.error('Please make sure your .env.local file is correctly set up with all NEXT_PUBLIC_FIREBASE_ variables.');
-        process.exit(1);
+        // Throw an error to stop execution if a value is missing
+        throw new Error(`Error: Missing Firebase config value for ${key}. Please make sure your .env.local file is correctly set up with all NEXT_PUBLIC_FIREBASE_ variables.`);
     }
 }
 

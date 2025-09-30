@@ -14,11 +14,10 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Check for missing config values
+// Check for missing config values and throw an error if any are missing
 for (const [key, value] of Object.entries(firebaseConfig)) {
     if (!value) {
-        console.error(`Error: Missing Firebase config value for ${key}`);
-        console.error('Please make sure your .env.local file is correctly set up with all NEXT_PUBLIC_FIREBASE_ variables.');
+        throw new Error(`Error: Missing Firebase config value for ${key}. Please make sure your .env.local file is correctly set up with all NEXT_PUBLIC_FIREBASE_ variables.`);
     }
 }
 

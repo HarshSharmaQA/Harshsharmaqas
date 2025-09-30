@@ -42,18 +42,15 @@ service cloud.firestore {
 
       // Likes subcollection
       match /likes/{userId} {
+        // Any authenticated user can check if they have liked a post
         allow get: if isAuth();
+        // Any authenticated user can like/unlike a post.
         allow create, delete: if isAuth() && request.auth.uid == userId;
-        // Allow anyone to get the count of likes
-        allow list: if false; // Deny listing all likes for privacy
-        allow update: if false; // Likes are only created or deleted
+        // Allow counting likes, but not reading the documents.
+        allow list: if request.query.limit == 0;
+        // Do not allow updates to likes, only create/delete
+        allow update: if false; 
       }
-      
-       // This rule is a bit of a workaround for Firestore's security model.
-       // It allows `getCountFromServer` to work for anyone, without exposing the documents.
-       match /likes/{document=**} {
-         allow get, list: if false;
-       }
     }
 
     // Courses can be read by anyone.
@@ -82,6 +79,11 @@ service cloud.firestore {
     match /settings/site {
       allow read: if true;
       allow write: if isAdmin();
+    }
+
+    // Lock down any other collections by default
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

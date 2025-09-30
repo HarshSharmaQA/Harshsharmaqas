@@ -15,12 +15,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Clock, BarChart2, User, CheckCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { EnrollDialog } from '@/components/courses/enroll-dialog';
 
 export function CourseDetails({ course }: { course: Course }) {
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
 
   const handleEnrollmentSuccess = () => {
     setIsEnrolled(true);
@@ -31,6 +37,14 @@ export function CourseDetails({ course }: { course: Course }) {
   const instructorImage = PlaceHolderImages.find((img) => img.id === 'instructor-avatar');
   
   const syllabusToShow = isEnrolled ? course.syllabus : course.syllabus.slice(0, 2);
+
+  if (!isClient) {
+    return (
+        <div className="flex justify-center items-center h-screen">
+            Loading course...
+        </div>
+    );
+  }
 
   return (
     <div className="bg-background">

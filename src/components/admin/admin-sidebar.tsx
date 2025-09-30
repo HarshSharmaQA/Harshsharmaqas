@@ -119,7 +119,7 @@ export default function AdminSidebar() {
       <SidebarFooter className="border-t p-2">
          <div className="flex items-center gap-3 p-2">
             <Avatar className={cn(state === 'collapsed' && 'mx-auto')}>
-                <AvatarImage src={user?.photoURL || "https://picsum.photos/seed/admin/100/100"} data-ai-hint="person portrait" />
+                <AvatarImage src={user?.photoURL || "https://picsum.photos/seed/admin/100/100"} />
                 <AvatarFallback>{user?.displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className={cn("flex-grow overflow-hidden", state === 'collapsed' && 'hidden')}>

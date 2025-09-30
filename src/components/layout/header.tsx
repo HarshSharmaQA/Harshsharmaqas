@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { Bot, Menu, LogOut, LayoutDashboard } from 'lucide-react';
 import { getAuth, signOut } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 
 import { app, db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
@@ -39,19 +39,23 @@ export default function Header({ siteName }: { siteName: string }) {
   const [userRole, setUserRole] = useState<'admin' | 'user' | null>(null);
   
   useEffect(() => {
-    const checkUserRole = async () => {
-      if (user) {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (user) {
+      const userDocRef = doc(db, 'users', user.uid);
+      // Use onSnapshot for real-time updates
+      const unsubscribe = onSnapshot(userDocRef, (userDoc) => {
         if (userDoc.exists()) {
           setUserRole(userDoc.data().role);
         } else {
+          // This case might happen if the user document hasn't been created yet.
+          // Defaulting to 'user' is a safe fallback.
           setUserRole('user');
         }
-      } else {
-        setUserRole(null);
-      }
-    };
-    checkUserRole();
+      });
+      // Clean up the listener when the component unmounts or user changes
+      return () => unsubscribe();
+    } else {
+      setUserRole(null);
+    }
   }, [user]);
 
   const handleLogout = () => {

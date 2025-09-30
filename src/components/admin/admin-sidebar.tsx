@@ -84,8 +84,8 @@ export default function AdminSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="flex items-center justify-between p-2">
-        <Link href="/admin" className={cn("flex items-center gap-2", state === 'collapsed' && 'hidden')}>
+      <SidebarHeader className="flex items-center justify-between">
+        <Link href="/admin" className={cn("flex items-center gap-2 p-2", state === 'collapsed' && 'hidden')}>
           <React.Suspense fallback={<IconLoadingSkeleton />}>
             <Bot className="h-6 w-6 text-primary" />
           </React.Suspense>
@@ -116,7 +116,7 @@ export default function AdminSidebar() {
           ))}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter className="border-t flex flex-col gap-4 p-2">
+      <SidebarFooter className="border-t p-2">
          <div className="flex items-center gap-3 p-2">
             <Avatar className={cn(state === 'collapsed' && 'mx-auto')}>
                 <AvatarImage src={user?.photoURL || "https://picsum.photos/seed/admin/100/100"} data-ai-hint="person portrait" />
@@ -127,7 +127,7 @@ export default function AdminSidebar() {
                 <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
             </div>
          </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-2">
             <Button onClick={handleLogout} variant="outline" className={cn("w-full justify-start", state === 'collapsed' && 'justify-center')}>
                 <React.Suspense fallback={<IconLoadingSkeleton />}>
                   <LogOut className={cn("h-4 w-4", state === 'expanded' && 'mr-2')} />

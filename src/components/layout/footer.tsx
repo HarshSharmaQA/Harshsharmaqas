@@ -29,7 +29,7 @@ export default async function Footer() {
 
   return (
     <footer className="bg-card border-t">
-      <div className="container py-8 px-4 sm:px-6 lg:px-8">
+      <div className="container py-8">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
             <Bot className="h-6 w-6 text-primary" />

@@ -209,7 +209,7 @@ export default async function HomePage() {
                     const imageId = `testimonial-${testimonial.id}`;
                     const image = PlaceHolderImages.find(img => img.id === imageId) || PlaceHolderImages.find(img => img.id === 'testimonial-1');
                     return (
-                    <Card key={testimonial.id} className="bg-card flex flex-col justify-between">
+                    <Card key={testimonial.id} className="bg-card flex flex-col">
                         <CardHeader>
                         <div className="flex items-center gap-4">
                             {image && (
@@ -227,7 +227,7 @@ export default async function HomePage() {
                         <CardContent className="flex-grow">
                         <p className="text-muted-foreground italic">&quot;{testimonial.quote}&quot;</p>
                         </CardContent>
-                        <CardContent>
+                        <CardContent className="flex justify-start">
                         <div className="flex items-center gap-1">
                             {Array(testimonial.stars).fill(0).map((_, i) => (
                                 <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
@@ -305,5 +305,3 @@ export default async function HomePage() {
     </div>
   );
 }
-
-    

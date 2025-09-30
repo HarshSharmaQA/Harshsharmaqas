@@ -21,11 +21,13 @@ const storage = getStorage(app);
 export function ImageUploader({ onUrlChange, initialUrl }: ImageUploaderProps) {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [imageUrl, setImageUrl] = useState<string | null>(initialUrl || null);
+  const [imageUrl, setImageUrl] = useState(initialUrl || '');
   const { toast } = useToast();
 
   useEffect(() => {
-    setImageUrl(initialUrl || null);
+    if (initialUrl) {
+      setImageUrl(initialUrl);
+    }
   }, [initialUrl]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,7 +45,6 @@ export function ImageUploader({ onUrlChange, initialUrl }: ImageUploaderProps) {
 
     setUploading(true);
     setProgress(0);
-    setImageUrl(null); // Clear previous image while uploading new one
     
     const storageRef = ref(storage, `blog-images/${Date.now()}-${file.name}`);
     const uploadTask = uploadBytesResumable(storageRef, file);
@@ -79,20 +80,18 @@ export function ImageUploader({ onUrlChange, initialUrl }: ImageUploaderProps) {
   return (
     <div className="space-y-4">
       <div className="w-full h-64 border-2 border-dashed rounded-lg flex items-center justify-center bg-muted/50 relative overflow-hidden">
-        {imageUrl && (
-          <Image src={imageUrl} alt="Uploaded feature image" fill className="object-cover" />
-        )}
-        {!imageUrl && !uploading && (
-          <div className="text-center text-muted-foreground">
-            <ImageIcon className="mx-auto h-12 w-12" />
-            <p>No image uploaded</p>
-          </div>
-        )}
-        {uploading && (
+        {uploading ? (
           <div className="w-full max-w-xs p-4 text-center">
             <Loader2 className="mx-auto h-8 w-8 animate-spin mb-2" />
             <p className="mb-2">Uploading...</p>
             <Progress value={progress} />
+          </div>
+        ) : imageUrl ? (
+          <Image src={imageUrl} alt="Uploaded feature image" fill className="object-cover" />
+        ) : (
+          <div className="text-center text-muted-foreground">
+            <ImageIcon className="mx-auto h-12 w-12" />
+            <p>No image uploaded</p>
           </div>
         )}
       </div>

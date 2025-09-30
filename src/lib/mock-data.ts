@@ -7,7 +7,8 @@ export type Course = {
   price: number;
   duration: string;
   level: 'Beginner' | 'Intermediate' | 'Advanced';
-  imageId: string;
+  imageUrl?: string;
+  imageId?: string; // Keep for backward compatibility with seeded data if necessary
   syllabus: { title: string; content: string }[];
 };
 

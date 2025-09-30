@@ -21,6 +21,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Loader2, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ImageUploader } from '@/components/admin/image-uploader';
 
 const syllabusSchema = z.object({
   title: z.string().min(1, 'Syllabus title is required.'),
@@ -35,7 +36,7 @@ const courseSchema = z.object({
   price: z.coerce.number().min(0, 'Price must be a positive number.'),
   duration: z.string().min(1, 'Duration is required.'),
   level: z.enum(['Beginner', 'Intermediate', 'Advanced']),
-  imageId: z.string().min(1, 'Image ID is required.'),
+  imageUrl: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
   syllabus: z.array(syllabusSchema).min(1, 'At least one syllabus item is required.'),
 });
 
@@ -55,7 +56,7 @@ export default function CreateCoursePage() {
       price: 0,
       duration: '',
       level: 'Beginner',
-      imageId: '',
+      imageUrl: '',
       syllabus: [{ title: '', content: '' }],
     },
   });
@@ -98,6 +99,8 @@ export default function CreateCoursePage() {
       .slice(0, 50);
     form.setValue('slug', slug, { shouldDirty: true });
   };
+  
+  const imageUrl = form.watch('imageUrl');
 
   return (
     <div className="space-y-8">
@@ -288,16 +291,18 @@ export default function CreateCoursePage() {
                       </FormItem>
                     )}
                   />
-                   <FormField
+                  <FormField
                     control={form.control}
-                    name="imageId"
+                    name="imageUrl"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Image ID</FormLabel>
+                        <FormLabel>Course Image</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., course-1-thumb" {...field} />
+                          <ImageUploader 
+                            onUrlChange={(url) => form.setValue('imageUrl', url, { shouldDirty: true })}
+                            initialUrl={imageUrl}
+                          />
                         </FormControl>
-                        <FormDescription>An ID from placeholder-images.json.</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}

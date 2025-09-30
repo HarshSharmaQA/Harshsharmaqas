@@ -152,21 +152,22 @@ export default async function HomePage() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {courses.map((course) => {
-                    const courseImage = PlaceHolderImages.find((img) => img.id === course.imageId);
+                    const placeholderImage = course.imageId ? PlaceHolderImages.find((img) => img.id === course.imageId) : null;
+                    const imageUrl = course.imageUrl || placeholderImage?.imageUrl || fallbackImage?.imageUrl || "https://picsum.photos/seed/course/400/250";
+                    const imageHint = placeholderImage?.imageHint || 'course image';
+                    
                     return (
                       <Card key={course.id} className="overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col group bg-background">
-                        {courseImage && (
-                          <div className="overflow-hidden">
-                              <Image
-                                src={courseImage.imageUrl}
-                                alt={course.title}
-                                width={400}
-                                height={250}
-                                className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-105"
-                                data-ai-hint={courseImage.imageHint}
-                              />
-                          </div>
-                        )}
+                        <div className="overflow-hidden">
+                            <Image
+                              src={imageUrl}
+                              alt={course.title}
+                              width={400}
+                              height={250}
+                              className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-105"
+                              data-ai-hint={imageHint}
+                            />
+                        </div>
                         <CardHeader>
                           <div className="flex justify-between items-center">
                               <Badge variant="secondary" className="capitalize">{course.level}</Badge>

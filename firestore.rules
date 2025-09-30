@@ -1,57 +1,51 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    function isAdmin() {
-      // Check if the user making the request has an 'admin' role in their user document.
-      // Important: This requires the user document to exist before checking the role.
-      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+
+    function isUser(uid) {
+      return request.auth != null && request.auth.uid == uid;
     }
 
-    function isUser(userId) {
-      return request.auth != null && request.auth.uid == userId;
+    // Use email check for list operations to avoid disallowed get() calls.
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'harshsharmaqa@gmail.com';
     }
 
     match /users/{uid} {
-      // Admins can list all users. Individual users can read their own data.
+      allow create: if request.auth != null;
+      // isAdmin() for list, isUser for individual read
       allow list: if isAdmin();
-      allow read: if isUser(uid) || isAdmin();
-      allow create;
-      allow write: if isUser(uid) || isAdmin();
-    }
-    
-    match /blogs/{blogId} {
-      allow read;
-      allow create, update, delete: if isAdmin();
-      
-      match /likes/{userId} {
-        allow read;
-        allow create, delete: if isUser(userId);
-      }
-    }
-    
-    match /courses/{courseId} {
-      allow read;
-      // Admins can list all courses for the dashboard.
-      allow list: if isAdmin();
-      allow create, update, delete: if isAdmin();
-    }
-    
-    match /testimonials/{testimonialId} {
-        allow read;
-        allow create, update, delete: if isAdmin();
-    }
-    
-    match /pages/{pageId} {
-        allow read;
-        allow create, update, delete: if isAdmin();
+      allow read, update: if isUser(uid) || isAdmin(); 
+      allow delete: if isAdmin();
     }
 
+    match /courses/{courseId} {
+      allow read, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /blogs/{blogId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+
+      match /likes/{userId} {
+        allow read, create, delete: if request.auth != null;
+      }
+    }
+
+    match /pages/{pageId} {
+      allow read: if resource.data.status == 'published' || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /testimonials/{testimonialId} {
+        allow read: if true;
+        allow create, update, delete: if isAdmin();
+    }
+    
     match /settings/site {
-      allow read;
+      allow read: if true;
       allow write: if isAdmin();
     }
   }

@@ -1,12 +1,15 @@
+'use client';
+
 import Link from 'next/link';
 import { collection, getDocs, orderBy, query, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useState, useEffect } from 'react';
 
 type BlogPost = {
   id: string;
@@ -24,9 +27,21 @@ async function getBlogPosts(): Promise<BlogPost[]> {
   return blogList;
 }
 
-export default async function BlogPage() {
-  const posts = await getBlogPosts();
+export default function BlogPage() {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
   const fallbackImage = PlaceHolderImages.find(img => img.id === 'course-detail-banner');
+
+  useEffect(() => {
+    getBlogPosts().then(fetchedPosts => {
+      setPosts(fetchedPosts);
+      setLoading(false);
+    }).catch(error => {
+      console.error("Error fetching posts: ", error);
+      setLoading(false);
+    });
+  }, []);
+
 
   return (
     <div className="bg-background">
@@ -36,7 +51,11 @@ export default async function BlogPage() {
           <p className="text-lg text-muted-foreground mt-2">Insights, tutorials, and news from the QAWala team.</p>
         </div>
 
-        {posts.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center items-center py-16">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          </div>
+        ) : posts.length === 0 ? (
            <div className="text-center py-16">
               <h2 className="text-2xl font-headline mb-2">No Posts Yet</h2>
               <p className="text-muted-foreground">Check back soon for our latest articles!</p>

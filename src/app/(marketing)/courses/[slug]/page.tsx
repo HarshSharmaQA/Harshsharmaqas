@@ -1,5 +1,7 @@
+'use client';
+
 import Image from 'next/image';
-import { notFound } from 'next/navigation';
+import { useParams, notFound } from 'next/navigation';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { type Course } from '@/lib/mock-data';
@@ -14,7 +16,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Clock, BarChart2, DollarSign } from 'lucide-react';
+import { Clock, BarChart2, DollarSign, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 async function getCourse(slug: string): Promise<Course | null> {
   const q = query(collection(db, 'courses'), where('slug', '==', slug), limit(1));
@@ -28,12 +31,39 @@ async function getCourse(slug: string): Promise<Course | null> {
   return courseDoc.data() as Course;
 }
 
+export default function CourseDetailPage() {
+  const params = useParams();
+  const slug = params.slug as string;
+  const [course, setCourse] = useState<Course | null>(null);
+  const [loading, setLoading] = useState(true);
 
-export default async function CourseDetailPage({ params }: { params: { slug: string } }) {
-  const course = await getCourse(params.slug);
+  useEffect(() => {
+    if (slug) {
+      getCourse(slug).then(fetchedCourse => {
+        if (fetchedCourse) {
+          setCourse(fetchedCourse);
+        } else {
+          notFound();
+        }
+        setLoading(false);
+      }).catch(error => {
+        console.error("Error fetching course: ", error);
+        setLoading(false);
+        // Optionally redirect or show an error message
+      });
+    }
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   if (!course) {
-    notFound();
+    return notFound();
   }
 
   const bannerImage = PlaceHolderImages.find((img) => img.id === 'course-detail-banner');

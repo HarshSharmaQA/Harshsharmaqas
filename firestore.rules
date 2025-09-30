@@ -22,9 +22,10 @@ function isAdmin() {
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Users can read/write their own user document, but cannot change their own role.
     // Admins can read/write any user document.
+    // A user can read/write their own user document, but cannot change their own role.
     match /users/{uid} {
+      allow list: if isAdmin();
       allow read: if isUser(uid) || isAdmin();
       // Allow create for anyone (for signup)
       allow create: if isAuth(); 

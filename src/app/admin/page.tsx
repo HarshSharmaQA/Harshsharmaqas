@@ -26,12 +26,16 @@ async function getDashboardData() {
   // Convert Timestamp to a serializable format (string)
   const recentPosts = blogSnapshot.docs.map(doc => {
       const data = doc.data();
-      return { 
+      const post: any = { 
           id: doc.id, 
           ...data,
           // Convert timestamp to string before passing to client component
           createdAt: data.createdAt.toDate().toISOString(),
-      } as unknown as BlogPost;
+      };
+      if (data.updatedAt) {
+        post.updatedAt = data.updatedAt.toDate().toISOString();
+      }
+      return post as BlogPost;
   });
 
 

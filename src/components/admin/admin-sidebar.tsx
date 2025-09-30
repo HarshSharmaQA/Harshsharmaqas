@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { getAuth, signOut } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import { doc, getDoc } from 'firebase/firestore';
 import {
   Sidebar,
   SidebarHeader,
@@ -33,7 +34,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { app } from '@/lib/firebase';
+import { app, db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState } from 'react';
 
@@ -49,6 +50,11 @@ const menuItems = [
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
+type UserProfile = {
+  name: string;
+  email: string;
+}
+
 export default function AdminSidebar() {
   const pathname = usePathname();
   const { toggleSidebar, state } = useSidebar();
@@ -56,6 +62,7 @@ export default function AdminSidebar() {
   const [user] = useAuthState(auth);
   const { toast } = useToast();
   const [isClient, setIsClient] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -68,6 +75,19 @@ export default function AdminSidebar() {
       sessionStorage.removeItem('cache-cleared');
     }
   }, [toast]);
+  
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (user) {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          setUserProfile(userDoc.data() as UserProfile);
+        }
+      }
+    };
+    fetchUserProfile();
+  }, [user]);
 
 
   const handleLogout = () => {
@@ -113,11 +133,11 @@ export default function AdminSidebar() {
          <div className="flex items-center gap-3 p-2">
             <Avatar>
                 <AvatarImage src={user?.photoURL || "https://picsum.photos/seed/admin/100/100"} data-ai-hint="person portrait" />
-                <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                <AvatarFallback>{userProfile?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className={cn("flex-grow", state === 'collapsed' && 'hidden')}>
-                <p className="font-semibold truncate">{user?.displayName || 'Admin User'}</p>
-                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                <p className="font-semibold truncate">{userProfile?.name || 'Admin User'}</p>
+                <p className="text-xs text-muted-foreground truncate">{userProfile?.email}</p>
             </div>
          </div>
           <div className="grid grid-cols-2 gap-2">

@@ -1,52 +1,62 @@
 rules_version = '2';
 
 // The admin UID. All admin actions will be checked against this UID.
-function getAdminUid() {
-  // This is the UID for the user harshsharmaqa@gmail.com
+function adminUid() {
   return "7YCygdl3aITdlmgRHqBrZCzuWcj1";
 }
 
-function isAuthenticated() {
+function isAuth() {
   return request.auth != null;
 }
 
-function isOwner(userId) {
-  return isAuthenticated() && request.auth.uid == userId;
+function isUser(uid) {
+  return isAuth() && request.auth.uid == uid;
 }
 
 function isAdmin() {
-  return isAuthenticated() && request.auth.uid == getAdminUid();
+  return isAuth() && request.auth.uid == adminUid();
 }
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Admins can list and read any user. Users can only read/write their own document.
-    match /users/{userId} {
-      allow list, read: if isAdmin();
-      allow create: if isAuthenticated(); 
-      // User can update their own info, but cannot change their role. Admin can update anything.
-      allow update: if (isOwner(userId) && !('role' in request.resource.data)) || isAdmin();
+    match /users/{uid} {
+      allow list: if request.auth != null && request.auth.uid == '7YCygdl3aITdlmgRHqBrZCzuWcj1';
+      allow read: if isUser(uid) || isAdmin();
+      allow create: if isAuth(); 
+      allow update: if (isUser(uid) && !('role' in request.resource.data)) || isAdmin();
       allow delete: if isAdmin();
     }
 
-    // Blogs can be read by anyone. Only admins can write.
     match /blogs/{blogId} {
       allow read: if true;
       allow write: if isAdmin();
 
-      // Any authenticated user can like/unlike a post.
       match /likes/{userId} {
-        allow create, delete: if isOwner(userId);
-        // Disallow reading the list of likes directly.
+        allow create, delete: if isAuth() && request.auth.uid == userId;
         allow read, list, update: if false; 
       }
     }
 
-    // Public collections are readable by anyone, writable only by admins.
-    match /courses/{docId} { allow read: if true; allow write: if isAdmin(); }
-    match /pages/{docId} { allow read: if true; allow write: if isAdmin(); }
-    match /testimonials/{docId} { allow read: if true; allow write: if isAdmin(); }
-    match /settings/{docId} { allow read: if true; allow write: if isAdmin(); }
+    match /courses/{courseId} {
+      allow read: if true;
+      allow list: if request.auth != null && request.auth.uid == '7YCygdl3aITdlmgRHqBrZCzuWcj1';
+      allow write: if isAdmin();
+    }
+    
+    match /pages/{pageId} {
+       allow read: if true;
+       allow write: if isAdmin();
+    }
+
+    match /testimonials/{testimonialId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /settings/site {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
   }
 }

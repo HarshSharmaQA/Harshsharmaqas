@@ -1,42 +1,87 @@
 
 rules_version = '2';
 
+// The admin UID. All admin actions will be checked against this UID.
+// Replace this with the actual UID of harshsharmaqa@gmail.com after they sign up.
+function adminUid() {
+  return "7YCygdl3aITdlmgRHqBrZCzuWcj1";
+}
+
+function isAuth() {
+  return request.auth != null;
+}
+
+function isUser(uid) {
+  return isAuth() && request.auth.uid == uid;
+}
+
+function isAdmin() {
+  return isAuth() && request.auth.uid == adminUid();
+}
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions
-    function isUser(uid) {
-      return request.auth.uid == uid;
+    // Admins can read/write any user document.
+    // A user can read their own user document.
+    match /users/{uid} {
+      allow list: if isAdmin();
+      allow read: if isUser(uid) || isAdmin();
+      // Allow create for any authenticated user (for signup)
+      allow create: if isAuth(); 
+      // Allow user to update their own info, but not role. Admin can update anything.
+      allow update: if (isUser(uid) && !('role' in request.resource.data)) || isAdmin();
+      // Only admin can delete users
+      allow delete: if isAdmin();
     }
 
-    // PUBLIC: Allow anyone to read blogs, pages, courses and testimonials.
+    // Blogs can be read by anyone.
+    // Only admins can create, update, or delete blogs.
     match /blogs/{blogId} {
-      allow read;
+      allow read: if true;
+      allow write: if isAdmin();
 
-      // Likes can be read by anyone, but only modified by the owner.
-      match /likes/{uid} {
-        allow read;
-        allow write: if isUser(uid);
+      // Likes subcollection
+      match /likes/{userId} {
+        // A user can read, create, or delete their own like document.
+        allow read, create, delete: if isAuth() && request.auth.uid == userId;
+        // A user cannot update a like, only create or delete it.
+        allow update: if false;
       }
     }
-    match /pages/{pageId} {
-      allow read;
-    }
+
+    // Courses can be read by anyone.
+    // Only admins can create, update, or delete courses.
     match /courses/{courseId} {
-      allow read;
-    }
-    match /testimonials/{testimonialId} {
-      allow read;
+      allow read: if true;
+      allow write: if isAdmin();
     }
     
-    // SITE: Only admins can write to site settings, anyone can read.
-    match /settings/site {
-        allow read;
+    // Custom Pages can be read by anyone.
+    // Only admins can create, update, or delete pages.
+    match /pages/{pageId} {
+       allow read: if true;
+       allow write: if isAdmin();
     }
 
-    // USERS: A user can be created on signup, but only the user can read/write their own document.
-    match /users/{uid} {
-      allow create, read, update, delete: if isUser(uid);
+    // Testimonials can be read by anyone.
+    // Only admins can create, update, or delete testimonials.
+    match /testimonials/{testimonialId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Site settings can be read by anyone.
+    // Only admins can change site settings.
+    match /settings/site {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // By default, no one can read or write to any other collection.
+    // This is a security best practice.
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

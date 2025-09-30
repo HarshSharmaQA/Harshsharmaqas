@@ -1,6 +1,6 @@
 
 import { notFound } from 'next/navigation';
-import { collection, query, where, getDocs, limit, Timestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit, Timestamp, collectionGroup } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { format } from 'date-fns';
 import Image from 'next/image';
@@ -38,6 +38,7 @@ async function getPost(slug: string): Promise<BlogPost | null> {
 }
 
 async function getRelatedPosts(category: string, currentPostId: string): Promise<BlogPost[]> {
+    if (!category) return []; // Don't query if category is undefined
     const q = query(
         collection(db, 'blogs'), 
         where('category', '==', category),
@@ -51,6 +52,12 @@ async function getRelatedPosts(category: string, currentPostId: string): Promise
     return posts.slice(0, 3); // Return at most 3 related posts
 }
 
+export async function generateStaticParams() {
+  const postsSnapshot = await getDocs(collection(db, 'blogs'));
+  return postsSnapshot.docs.map(doc => ({
+    slug: doc.data().slug,
+  }));
+}
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const awaitedParams = await params;
@@ -86,7 +93,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
     notFound();
   }
 
-  const relatedPosts = await getRelatedPosts(post.category, post.id);
+  const relatedPosts = post.category ? await getRelatedPosts(post.category, post.id) : [];
   const fallbackImage = PlaceHolderImages.find(img => img.id === 'course-detail-banner');
   const imageUrl = post.featureImageUrl || fallbackImage?.imageUrl || "https://picsum.photos/seed/blog-detail/1200/600";
 

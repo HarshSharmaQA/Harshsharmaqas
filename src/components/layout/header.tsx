@@ -10,9 +10,8 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 
 const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/about', label: 'About' },
   { href: '/blog', label: 'Blog' },
+  { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ];
 
@@ -40,7 +39,7 @@ export default function Header() {
             </SheetTrigger>
             <SheetContent side="left">
               <div className="p-4">
-                <Link href="/" className="flex items-center gap-2 mb-8">
+                <Link href="/" className="flex items-center gap-2 mb-8" onClick={() => setIsMobileMenuOpen(false)}>
                   <Bot className="h-6 w-6 text-primary" />
                   <span className="font-bold font-headline text-lg">QAWala</span>
                 </Link>

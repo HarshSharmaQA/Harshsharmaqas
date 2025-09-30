@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { getAuth, createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup, User, getAdditionalUserInfo } from "firebase/auth";
-import { doc, setDoc, getDoc, serverTimestamp, collection, getDocs, query, limit } from 'firebase/firestore';
+import { getAuth, createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup, User } from "firebase/auth";
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -31,6 +31,7 @@ const signupSchema = z.object({
 });
 
 type SignupFormValues = z.infer<typeof signupSchema>;
+const ADMIN_EMAIL = 'harshsharmaqa@gmail.com';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -43,50 +44,25 @@ export default function SignupPage() {
     const userDocRef = doc(db, 'users', user.uid);
     const userDoc = await getDoc(userDocRef);
 
-    // Only create a new document if one doesn't already exist.
     if (!userDoc.exists()) {
-      let role = 'user';
-      
-      const adminEmails = ['harshsharmaqa@gmail.com', 'admin@example.com'];
-
-      // Ensure the primary email is always an admin
-      if (adminEmails.includes(user.email || '')) {
-        role = 'admin';
-      } else {
-        // Fallback for first-ever user if not the primary admin
-        const usersCollectionRef = collection(db, 'users');
-        const firstUserQuery = query(usersCollectionRef, limit(1));
-        const snapshot = await getDocs(firstUserQuery);
-        // If there are no users (this new user is the first), make them an admin.
-        if (snapshot.empty) {
-          role = 'admin';
-        }
-      }
-
       await setDoc(userDocRef, {
         uid: user.uid,
         name: user.displayName,
         email: user.email,
-        role: role,
         joinedAt: serverTimestamp(),
       });
     }
   };
 
   const handleLoginSuccess = async (user: User) => {
-    // We create the user document here to handle both email and Google sign-up flows.
     await createUserDocument(user);
     
     toast({
       title: 'Success',
-      description: 'Logged in successfully!',
+      description: 'Account created and logged in successfully!',
     });
 
-    // We must re-fetch the document to get the correct role, especially for the first user.
-    const userDocRef = doc(db, 'users', user.uid);
-    const userDoc = await getDoc(userDocRef);
-
-    if (userDoc.exists() && userDoc.data().role === 'admin') {
+    if (user.email === ADMIN_EMAIL) {
       router.push('/admin');
     } else {
       router.push('/');
@@ -115,7 +91,6 @@ export default function SignupPage() {
       await updateProfile(userCredential.user, {
         displayName: data.name
       });
-      // Now handle the login success which includes creating the user document.
       await handleLoginSuccess(userCredential.user);
 
     } catch (error: any) {

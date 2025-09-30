@@ -3,10 +3,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { getAuth, signOut } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { doc, getDoc } from 'firebase/firestore';
 import {
   Sidebar,
   SidebarHeader,
@@ -20,13 +20,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { app, db } from '@/lib/firebase';
+import { app } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
-import { useEffect, useState } from 'react';
 import { Skeleton } from '../ui/skeleton';
-import { Badge } from '../ui/badge';
 
-// Dynamically import icons to reduce chunk size
 const Bot = dynamic(() => import('lucide-react').then(mod => mod.Bot));
 const LayoutDashboard = dynamic(() => import('lucide-react').then(mod => mod.LayoutDashboard));
 const FileText = dynamic(() => import('lucide-react').then(mod => mod.FileText));
@@ -55,12 +52,6 @@ const menuItems = [
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
-type UserProfile = {
-  name: string;
-  email: string;
-  role: 'admin' | 'user';
-}
-
 export default function AdminSidebar() {
   const pathname = usePathname();
   const { toggleSidebar, state } = useSidebar();
@@ -68,11 +59,9 @@ export default function AdminSidebar() {
   const [user] = useAuthState(auth);
   const { toast } = useToast();
   const [isClient, setIsClient] = useState(false);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
     setIsClient(true);
-    // Check if we need to show the cache cleared toast
     if (sessionStorage.getItem('cache-cleared')) {
       toast({
         title: 'Cache Cleared',
@@ -81,20 +70,6 @@ export default function AdminSidebar() {
       sessionStorage.removeItem('cache-cleared');
     }
   }, [toast]);
-  
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (user) {
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          setUserProfile(userDoc.data() as UserProfile);
-        }
-      }
-    };
-    fetchUserProfile();
-  }, [user]);
-
 
   const handleLogout = () => {
     signOut(auth);
@@ -145,14 +120,11 @@ export default function AdminSidebar() {
          <div className="flex items-center gap-3 p-2">
             <Avatar>
                 <AvatarImage src={user?.photoURL || "https://picsum.photos/seed/admin/100/100"} data-ai-hint="person portrait" />
-                <AvatarFallback>{userProfile?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                <AvatarFallback>{user?.displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className={cn("flex-grow overflow-hidden", state === 'collapsed' && 'hidden')}>
-                <div className="flex items-center gap-2">
-                    <p className="font-semibold truncate">{userProfile?.name || 'Admin User'}</p>
-                    {userProfile?.role && <Badge variant={userProfile.role === 'admin' ? 'destructive' : 'secondary'} className="capitalize">{userProfile.role}</Badge>}
-                </div>
-                <p className="text-xs text-muted-foreground truncate">{userProfile?.email}</p>
+                <p className="font-semibold truncate">{user?.displayName || 'Admin User'}</p>
+                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
             </div>
          </div>
           <div className="grid grid-cols-2 gap-2">

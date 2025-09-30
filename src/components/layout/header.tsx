@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -6,9 +7,8 @@ import { useEffect, useState } from 'react';
 import { Bot, Menu, LogOut, LayoutDashboard } from 'lucide-react';
 import { getAuth, signOut } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
 
-import { app, db } from '@/lib/firebase';
+import { app } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
@@ -21,7 +21,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-import { Badge } from '../ui/badge';
 
 const navLinks = [
   { href: '/blog', label: 'Blog' },
@@ -30,33 +29,14 @@ const navLinks = [
   { href: '/contact', label: 'Contact' },
 ];
 
+const ADMIN_EMAIL = 'harshsharmaqa@gmail.com';
+
 export default function Header({ siteName }: { siteName: string }) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const auth = getAuth(app);
   const [user, loading] = useAuthState(auth);
-  const [userRole, setUserRole] = useState<'admin' | 'user' | null>(null);
-  
-  useEffect(() => {
-    if (user) {
-      const userDocRef = doc(db, 'users', user.uid);
-      // Use onSnapshot for real-time updates to the user's role
-      const unsubscribe = onSnapshot(userDocRef, (userDoc) => {
-        if (userDoc.exists()) {
-          setUserRole(userDoc.data().role);
-        } else {
-          // This can happen briefly if the user document isn't created yet on signup.
-          // Defaulting to 'user' is a safe fallback.
-          setUserRole('user');
-        }
-      });
-      // Clean up the listener when the component unmounts or the user changes
-      return () => unsubscribe();
-    } else {
-      // If there is no user, reset the role
-      setUserRole(null);
-    }
-  }, [user]);
+  const isAdmin = user?.email === ADMIN_EMAIL;
 
   const handleLogout = () => {
     signOut(auth);
@@ -151,16 +131,10 @@ export default function Header({ siteName }: { siteName: string }) {
                     <p className="text-xs leading-none text-muted-foreground">
                       {user.email}
                     </p>
-                     {userRole && (
-                      <div className="flex items-center pt-2">
-                        <p className="text-xs leading-none text-muted-foreground">Role:</p>
-                        <Badge variant={userRole === 'admin' ? 'destructive' : 'secondary'} className="ml-2 text-xs capitalize">{userRole}</Badge>
-                      </div>
-                    )}
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {userRole === 'admin' && (
+                {isAdmin && (
                    <DropdownMenuItem asChild>
                     <Link href="/admin">
                       <LayoutDashboard className="mr-2 h-4 w-4" />

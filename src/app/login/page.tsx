@@ -57,7 +57,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center p-4">
       <Link href="/" className="absolute top-4 left-4 flex items-center gap-2 text-lg font-semibold font-headline md:top-8 md:left-8">
         <Bot className="h-6 w-6 text-primary" />
-        <span>QA Ranker</span>
+        <span>QAWala</span>
       </Link>
       <Card className="w-full max-w-sm shadow-2xl">
         <CardHeader className="text-center">

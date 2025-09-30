@@ -38,7 +38,7 @@ const testimonials = [
   {
     name: 'Sarah J.',
     role: 'Senior QA Engineer',
-    quote: "QA Ranker's courses are top-notch. The automation course helped me land a promotion!",
+    quote: "QAWala's courses are top-notch. The automation course helped me land a promotion!",
     imageId: 'testimonial-1',
   },
   {
@@ -164,7 +164,7 @@ export default async function HomePage() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold font-headline">What Our Users Say</h2>
-              <p className="text-lg text-muted-foreground mt-2">Real feedback from the QA Ranker community.</p>
+              <p className="text-lg text-muted-foreground mt-2">Real feedback from the QAWala community.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {testimonials.map((testimonial) => {
@@ -199,7 +199,7 @@ export default async function HomePage() {
             <Rocket className="h-12 w-12 mx-auto mb-4" />
             <h2 className="text-3xl md:text-4xl font-bold font-headline">Ready to Rank #1?</h2>
             <p className="text-lg md:text-xl mt-2 mb-8 max-w-2xl mx-auto">
-              Join QA Ranker today and get access to all the tools and training you need to excel.
+              Join QAWala today and get access to all the tools and training you need to excel.
             </p>
             <Button size="lg" variant="secondary" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90" asChild>
               <Link href="/signup">

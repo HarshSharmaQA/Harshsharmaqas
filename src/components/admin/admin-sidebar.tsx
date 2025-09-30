@@ -56,7 +56,7 @@ export default function AdminSidebar() {
       <SidebarHeader className="flex items-center justify-between">
         <Link href="/admin" className={cn("flex items-center gap-2", state === 'collapsed' && 'hidden')}>
           <Bot className="h-6 w-6 text-primary" />
-          <span className="font-bold font-headline text-lg">QA Ranker</span>
+          <span className="font-bold font-headline text-lg">QAWala</span>
         </Link>
         <Button variant="ghost" size="icon" onClick={toggleSidebar} className={cn(state === 'collapsed' && 'mx-auto')}>
           <PanelLeft />

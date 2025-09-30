@@ -36,7 +36,7 @@ export default async function BlogPage() {
       <div className="container py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold font-headline">Our Blog</h1>
-          <p className="text-lg text-muted-foreground mt-2">Insights, tutorials, and news from the QA Ranker team.</p>
+          <p className="text-lg text-muted-foreground mt-2">Insights, tutorials, and news from the QAWala team.</p>
         </div>
 
         {posts.length === 0 ? (

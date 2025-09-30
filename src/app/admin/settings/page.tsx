@@ -21,11 +21,11 @@ export default function AdminSettingsPage() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="siteName">Site Name</Label>
-            <Input id="siteName" defaultValue="QA Ranker" />
+            <Input id="siteName" defaultValue="QAWala" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="adminEmail">Admin Email</Label>
-            <Input id="adminEmail" type="email" defaultValue="admin@qaranker.com" />
+            <Input id="adminEmail" type="email" defaultValue="admin@qawala.com" />
           </div>
           <Button>Save Changes</Button>
         </CardContent>

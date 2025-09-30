@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'QA Ranker',
+  title: 'QAWala',
   description: 'The #1 destination for QA professionals and aspirants. Enhance your skills with our courses and tools.',
 };
 

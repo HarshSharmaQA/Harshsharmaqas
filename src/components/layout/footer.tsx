@@ -8,10 +8,10 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
             <Bot className="h-6 w-6 text-primary" />
-            <span className="font-bold font-headline text-lg">QA Ranker</span>
+            <span className="font-bold font-headline text-lg">QAWala</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} QA Ranker. All rights reserved.
+            © {new Date().getFullYear()} QAWala. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
             <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">

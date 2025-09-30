@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { collection, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
+import { collection, onSnapshot, deleteDoc, doc, orderBy, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -22,7 +22,6 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
 import {
   DropdownMenu,
@@ -40,7 +39,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
 export type BlogPost = {
@@ -59,7 +57,8 @@ export default function AdminBlogsPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'blogs'), (snapshot) => {
+    const q = query(collection(db, 'blogs'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
       const postsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPost));
       setPosts(postsData);
     });

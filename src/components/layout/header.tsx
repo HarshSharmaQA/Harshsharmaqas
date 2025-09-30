@@ -26,7 +26,7 @@ export default function Header() {
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="flex items-center gap-2">
             <Bot className="h-6 w-6 text-primary" />
-            <span className="font-bold font-headline text-lg">QA Ranker</span>
+            <span className="font-bold font-headline text-lg">QAWala</span>
           </Link>
         </div>
         
@@ -42,7 +42,7 @@ export default function Header() {
               <div className="p-4">
                 <Link href="/" className="flex items-center gap-2 mb-8">
                   <Bot className="h-6 w-6 text-primary" />
-                  <span className="font-bold font-headline text-lg">QA Ranker</span>
+                  <span className="font-bold font-headline text-lg">QAWala</span>
                 </Link>
                 <nav className="flex flex-col gap-4">
                   {navLinks.map((link) => (

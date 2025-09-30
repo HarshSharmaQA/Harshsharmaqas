@@ -27,14 +27,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useEffect, useState } from 'react';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 export default function AdminCoursesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'courses'), (snapshot) => {
+    const q = query(collection(db, 'courses'), orderBy('title'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
       const coursesData = snapshot.docs.map(doc => doc.data() as Course);
       setCourses(coursesData);
     });

@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/courses', label: 'Courses' },
+  { href: '/blog', label: 'Blog' },
   { href: '/admin', label: 'Admin Panel' },
 ];
 
@@ -51,7 +52,7 @@ export default function Header() {
                       onClick={() => setIsMobileMenuOpen(false)}
                       className={cn(
                         "text-lg font-medium transition-colors hover:text-primary",
-                        pathname === link.href ? "text-primary" : "text-foreground/80"
+                        pathname.startsWith(link.href) && link.href !== '/' || pathname === link.href ? "text-primary" : "text-foreground/80"
                       )}
                     >
                       {link.label}
@@ -71,7 +72,7 @@ export default function Header() {
                 href={link.href}
                 className={cn(
                   "text-sm font-medium transition-colors hover:text-primary",
-                  pathname === link.href ? "text-foreground" : "text-foreground/60"
+                  pathname.startsWith(link.href) && link.href !== '/' || pathname === link.href ? "text-foreground" : "text-foreground/60"
                 )}
               >
                 {link.label}

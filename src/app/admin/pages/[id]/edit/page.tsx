@@ -141,7 +141,7 @@ export default function EditPage() {
                           <Textarea placeholder="Write your page content here. Basic HTML is supported." {...field} rows={25} />
                         </FormControl>
                         <FormDescription>
-                          You can use basic HTML tags like `<h1>`, `<p>`, `<b>`, etc. for formatting.
+                          {'You can use basic HTML tags like `<h1>`, `<p>`, `<b>`, etc. for formatting.'}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>

@@ -89,7 +89,6 @@ export default function SignupPage() {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-      const additionalInfo = getAdditionalUserInfo(result);
       // We need to check if the user document already exists before calling handleLoginSuccess
       const userDocRef = doc(db, 'users', result.user.uid);
       const userDoc = await getDoc(userDocRef);
@@ -120,7 +119,7 @@ export default function SignupPage() {
         description: "You can now log in.",
       });
       router.push('/login');
-    } catch (error: any) => {
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Signup Failed",

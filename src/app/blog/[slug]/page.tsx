@@ -1,15 +1,19 @@
 'use client';
 
-import { useParams, notFound } from 'next/navigation';
-import { collection, query, where, getDocs, limit, Timestamp } from 'firebase/firestore';
+import { useParams, notFound, useRouter } from 'next/navigation';
+import { collection, query, where, getDocs, limit, Timestamp, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { format } from 'date-fns';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Share2 } from 'lucide-react';
+import { LikeButton } from '@/components/blog/like-button';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 type BlogPost = {
+  id: string;
   title: string;
   content: string;
   seoTitle: string;
@@ -28,7 +32,7 @@ async function getPost(slug: string): Promise<BlogPost | null> {
   }
 
   const postDoc = querySnapshot.docs[0];
-  return postDoc.data() as BlogPost;
+  return { id: postDoc.id, ...postDoc.data() } as BlogPost;
 }
 
 export default function BlogPostPage() {
@@ -36,6 +40,8 @@ export default function BlogPostPage() {
   const slug = params.slug as string;
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (slug) {
@@ -53,6 +59,28 @@ export default function BlogPostPage() {
       });
     }
   }, [slug]);
+
+  const handleShare = async () => {
+    const shareData = {
+      title: post?.title,
+      text: post?.seoDescription,
+      url: window.location.href,
+    };
+    if (navigator.share && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.error('Error sharing:', err);
+      }
+    } else {
+      // Fallback for browsers that do not support the Web Share API
+      navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: 'Link Copied',
+        description: 'The link to this post has been copied to your clipboard.',
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -90,6 +118,12 @@ export default function BlogPostPage() {
         </section>
 
         <div className="container py-12 md:py-16">
+             <div className="max-w-prose mx-auto mb-8 flex items-center justify-end gap-2">
+                <LikeButton postId={post.id} />
+                <Button variant="outline" size="icon" onClick={handleShare}>
+                    <Share2 className="h-4 w-4" />
+                </Button>
+            </div>
             <article className="prose prose-lg dark:prose-invert mx-auto">
                 <div className="whitespace-pre-wrap text-foreground">
                 {post.content}

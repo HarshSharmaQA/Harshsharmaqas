@@ -14,6 +14,15 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
+// Check for missing config values
+for (const [key, value] of Object.entries(firebaseConfig)) {
+    if (!value) {
+        console.error(`Error: Missing Firebase config value for ${key}`);
+        console.error('Please make sure your .env.local file is correctly set up with all NEXT_PUBLIC_FIREBASE_ variables.');
+    }
+}
+
+
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
@@ -21,7 +30,7 @@ const db = getFirestore(app);
 // Initialize Analytics if it's supported, but don't block app load
 if (typeof window !== 'undefined') {
   isSupported().then(supported => {
-    if (supported) {
+    if (supported && firebaseConfig.appId) { // Ensure appId exists before initializing
       getAnalytics(app);
     }
   });

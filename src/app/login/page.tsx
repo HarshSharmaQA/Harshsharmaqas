@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -43,7 +42,9 @@ export default function LoginPage() {
       description: 'Logged in successfully!',
     });
 
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    const userDocRef = doc(db, 'users', user.uid);
+    const userDoc = await getDoc(userDocRef);
+
     if (userDoc.exists() && userDoc.data().role === 'admin') {
       router.push('/admin');
     } else {
@@ -56,9 +57,8 @@ export default function LoginPage() {
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider)
       .then(async (result) => {
-        // This function needs to handle both new and existing users.
-        // We will check for an existing user document in the signup page's version of this function.
-        // For login, we can assume the user exists.
+        // The signup page's logic handles user document creation for Google sign-in.
+        // Here, we just need to log them in and redirect.
         await handleLoginSuccess(result.user);
       })
       .catch((error) => {

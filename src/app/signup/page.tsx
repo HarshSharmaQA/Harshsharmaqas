@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -55,7 +54,7 @@ export default function SignupPage() {
         const usersCollectionRef = collection(db, 'users');
         const firstUserQuery = query(usersCollectionRef, limit(1));
         const snapshot = await getDocs(firstUserQuery);
-        // If there are no users, this person becomes an admin.
+        // If there are no users (this new user is the first), make them an admin.
         if (snapshot.empty) {
           role = 'admin';
         }
@@ -80,7 +79,10 @@ export default function SignupPage() {
       description: 'Logged in successfully!',
     });
 
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    // We must re-fetch the document to get the correct role, especially for the first user.
+    const userDocRef = doc(db, 'users', user.uid);
+    const userDoc = await getDoc(userDocRef);
+
     if (userDoc.exists() && userDoc.data().role === 'admin') {
       router.push('/admin');
     } else {

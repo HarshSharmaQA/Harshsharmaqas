@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -41,19 +40,20 @@ export default function Header({ siteName }: { siteName: string }) {
   useEffect(() => {
     if (user) {
       const userDocRef = doc(db, 'users', user.uid);
-      // Use onSnapshot for real-time updates
+      // Use onSnapshot for real-time updates to the user's role
       const unsubscribe = onSnapshot(userDocRef, (userDoc) => {
         if (userDoc.exists()) {
           setUserRole(userDoc.data().role);
         } else {
-          // This case might happen if the user document hasn't been created yet.
+          // This can happen briefly if the user document isn't created yet on signup.
           // Defaulting to 'user' is a safe fallback.
           setUserRole('user');
         }
       });
-      // Clean up the listener when the component unmounts or user changes
+      // Clean up the listener when the component unmounts or the user changes
       return () => unsubscribe();
     } else {
+      // If there is no user, reset the role
       setUserRole(null);
     }
   }, [user]);
@@ -152,7 +152,7 @@ export default function Header({ siteName }: { siteName: string }) {
                       {user.email}
                     </p>
                      {userRole && (
-                      <div className="flex items-center pt-1">
+                      <div className="flex items-center pt-2">
                         <p className="text-xs leading-none text-muted-foreground">Role:</p>
                         <Badge variant={userRole === 'admin' ? 'destructive' : 'secondary'} className="ml-2 text-xs capitalize">{userRole}</Badge>
                       </div>

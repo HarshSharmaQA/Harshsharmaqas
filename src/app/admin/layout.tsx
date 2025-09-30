@@ -20,20 +20,30 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (loading) {
+      // Still waiting for auth state to load
       return;
     }
     if (!user) {
+      // If no user, redirect to login and stop checking
       router.replace('/login');
+      setIsChecking(false);
       return;
     }
 
+    // User is authenticated, now check their role in Firestore
     const checkAdminStatus = async () => {
       const userDocRef = doc(db, 'users', user.uid);
       const userDoc = await getDoc(userDocRef);
       if (userDoc.exists() && userDoc.data().role === 'admin') {
         setIsAdmin(true);
       } else {
-        router.replace('/'); // Redirect non-admins to homepage
+        // User is not an admin, redirect them to the homepage
+        toast({
+            variant: 'destructive',
+            title: 'Access Denied',
+            description: 'You do not have permission to access the admin area.',
+        });
+        router.replace('/'); 
       }
       setIsChecking(false);
     };
@@ -41,14 +51,27 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     checkAdminStatus();
   }, [user, loading, router]);
 
-  if (loading || isChecking || !isAdmin) {
+  // This loading state covers auth check, Firestore check, and admin status
+  if (loading || isChecking) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }
+
+  // If, after all checks, the user is not an admin, render nothing (or a redirect).
+  // The useEffect hook already handles the redirection.
+  if (!isAdmin) {
+     return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="ml-4">Redirecting...</p>
+      </div>
+    );
+  }
   
+  // Only render the admin layout if the user is a confirmed admin
   return (
     <SidebarProvider>
       <AdminSidebar />

@@ -45,6 +45,8 @@ export function LikeButton({ postId }: LikeButtonProps) {
       }
     };
     
+    // We only depend on authLoading to trigger the initial fetch.
+    // The user object is checked inside getLikes.
     if (!authLoading) {
       getLikes();
     }
@@ -86,9 +88,13 @@ export function LikeButton({ postId }: LikeButtonProps) {
       });
     } finally {
         // Fetch true count from server to ensure consistency
-        const likesCol = collection(db, 'blogs', postId, 'likes');
-        const snapshot = await getCountFromServer(likesCol);
-        setLikes(snapshot.data().count);
+        try {
+            const likesCol = collection(db, 'blogs', postId, 'likes');
+            const snapshot = await getCountFromServer(likesCol);
+            setLikes(snapshot.data().count);
+        } catch(e) {
+            console.error("Could not refetch likes count after update", e);
+        }
         setIsLoading(false);
     }
   };

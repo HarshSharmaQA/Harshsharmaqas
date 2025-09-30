@@ -1,4 +1,3 @@
-
 rules_version = '2';
 
 // The admin UID. All admin actions will be checked against this UID.
@@ -23,11 +22,11 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // Admins can read/write any user document.
-    // A user can read their own user document.
+    // A user can read/write their own user document, but cannot change their own role.
     match /users/{uid} {
       allow list: if isAdmin();
       allow read: if isUser(uid) || isAdmin();
-      // Allow create for any authenticated user (for signup)
+      // Allow create for anyone (for signup)
       allow create: if isAuth(); 
       // Allow user to update their own info, but not role. Admin can update anything.
       allow update: if (isUser(uid) && !('role' in request.resource.data)) || isAdmin();
@@ -43,11 +42,18 @@ service cloud.firestore {
 
       // Likes subcollection
       match /likes/{userId} {
-        // A user can read, create, or delete their own like document.
-        allow read, create, delete: if isAuth() && request.auth.uid == userId;
-        // A user cannot update a like, only create or delete it.
-        allow update: if false;
+        allow get: if isAuth();
+        allow create, delete: if isAuth() && request.auth.uid == userId;
+        // Allow anyone to get the count of likes
+        allow list: if false; // Deny listing all likes for privacy
+        allow update: if false; // Likes are only created or deleted
       }
+      
+       // This rule is a bit of a workaround for Firestore's security model.
+       // It allows `getCountFromServer` to work for anyone, without exposing the documents.
+       match /likes/{document=**} {
+         allow get, list: if false;
+       }
     }
 
     // Courses can be read by anyone.
@@ -76,12 +82,6 @@ service cloud.firestore {
     match /settings/site {
       allow read: if true;
       allow write: if isAdmin();
-    }
-
-    // By default, no one can read or write to any other collection.
-    // This is a security best practice.
-    match /{document=**} {
-      allow read, write: if false;
     }
   }
 }

@@ -20,6 +20,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Loader2 } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect } from 'react';
+import { ImageUploader } from '@/components/admin/image-uploader';
 
 const blogSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
@@ -56,7 +57,8 @@ export default function EditBlogPage() {
         const postDocRef = doc(db, 'blogs', postId);
         const postDoc = await getDoc(postDocRef);
         if (postDoc.exists()) {
-          form.reset(postDoc.data() as BlogFormValues);
+          const postData = postDoc.data() as BlogFormValues;
+          form.reset(postData);
         } else {
           toast({ variant: 'destructive', title: 'Error', description: 'Blog post not found.' });
           router.push('/admin/blogs');
@@ -66,7 +68,7 @@ export default function EditBlogPage() {
     }
   }, [postId, form, router, toast]);
 
-  const { isSubmitting } = form.formState;
+  const { isSubmitting, isDirty } = form.formState;
 
   const onSubmit = async (values: BlogFormValues) => {
     try {
@@ -96,8 +98,10 @@ export default function EditBlogPage() {
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
       .slice(0, 50);
-    form.setValue('slug', slug);
+    form.setValue('slug', slug, { shouldDirty: true });
   };
+  
+  const featureImageUrl = form.watch('featureImageUrl');
 
   return (
     <div className="space-y-8">
@@ -140,6 +144,23 @@ export default function EditBlogPage() {
                   </FormItem>
                 )}
               />
+              
+              <FormField
+                control={form.control}
+                name="featureImageUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Feature Image</FormLabel>
+                    <FormControl>
+                       <ImageUploader 
+                        onUrlChange={(url) => form.setValue('featureImageUrl', url, { shouldDirty: true })}
+                        initialUrl={featureImageUrl}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
@@ -149,20 +170,6 @@ export default function EditBlogPage() {
                     <FormLabel>Content</FormLabel>
                     <FormControl>
                       <Textarea placeholder="Write your blog post here..." {...field} rows={15} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="featureImageUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Feature Image URL (Optional)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://example.com/image.jpg" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -199,7 +206,7 @@ export default function EditBlogPage() {
                 )}
               />
               
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting || !isDirty}>
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isSubmitting ? 'Saving...' : 'Save Changes'}
               </Button>

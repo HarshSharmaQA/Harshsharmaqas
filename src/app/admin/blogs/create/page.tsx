@@ -20,6 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { ImageUploader } from '@/components/admin/image-uploader';
 
 const blogSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
@@ -136,12 +137,14 @@ export default function CreateBlogPage() {
 
               <FormField
                 control={form.control}
-                name="content"
+                name="featureImageUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Content</FormLabel>
+                    <FormLabel>Feature Image</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Write your blog post here..." {...field} rows={15} />
+                      <ImageUploader 
+                        onUrlChange={(url) => form.setValue('featureImageUrl', url)}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -150,12 +153,12 @@ export default function CreateBlogPage() {
 
               <FormField
                 control={form.control}
-                name="featureImageUrl"
+                name="content"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Feature Image URL (Optional)</FormLabel>
+                    <FormLabel>Content</FormLabel>
                     <FormControl>
-                      <Input placeholder="https://example.com/image.jpg" {...field} />
+                      <Textarea placeholder="Write your blog post here..." {...field} rows={15} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

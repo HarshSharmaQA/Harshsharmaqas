@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -12,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
 
-const mockKeywords = [
+const initialKeywords = [
   { keyword: 'QA', rank: 3, change: 1, volume: '12,100' },
   { keyword: 'manual tester', rank: 7, change: -2, volume: '8,100' },
   { keyword: 'website tester', rank: 5, change: 0, volume: '5,400' },
@@ -43,6 +44,24 @@ function RankChange({ change }: { change: number }) {
 }
 
 export function KeywordRankTracker() {
+  const [keywords, setKeywords] = useState(initialKeywords);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setKeywords(prevKeywords =>
+        prevKeywords.map(kw => {
+          const rankChange = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+          const newRank = Math.max(1, kw.rank + rankChange);
+          const change = newRank - kw.rank;
+          
+          return { ...kw, rank: newRank, change: change };
+        })
+      );
+    }, 3000); // Update every 3 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <Card>
       <CardHeader>
@@ -60,7 +79,7 @@ export function KeywordRankTracker() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockKeywords.map((item) => (
+            {keywords.map((item) => (
               <TableRow key={item.keyword}>
                 <TableCell className="font-medium">{item.keyword}</TableCell>
                 <TableCell className="text-center">

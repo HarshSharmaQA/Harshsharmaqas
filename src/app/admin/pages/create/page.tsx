@@ -164,7 +164,7 @@ export default function CreatePage() {
                               <FormControl>
                               <SelectTrigger>
                                   <SelectValue placeholder="Select a status" />
-                              </SelectTrigger>
+                              </Trigger>
                               </FormControl>
                               <SelectContent>
                               <SelectItem value="draft">Draft</SelectItem>

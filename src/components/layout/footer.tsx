@@ -35,7 +35,7 @@ export default async function Footer() {
             <Bot className="h-6 w-6 text-primary" />
             <span className="font-bold font-headline text-lg">{settings?.siteName || 'QAWala'}</span>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground order-last md:order-none">
             © {new Date().getFullYear()} {settings?.siteName || 'QAWala'}. All rights reserved.
           </p>
           <div className="flex items-center gap-4">

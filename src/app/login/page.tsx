@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, User } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -19,7 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Bot, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { app } from '@/lib/firebase';
+import { app, db } from '@/lib/firebase';
 import { Separator } from '@/components/ui/separator';
 
 const loginSchema = z.object({
@@ -36,16 +37,26 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   });
 
+  const handleLoginSuccess = async (user: User) => {
+    toast({
+      title: 'Success',
+      description: 'Logged in successfully!',
+    });
+
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (userDoc.exists() && userDoc.data().role === 'admin') {
+      router.push('/admin');
+    } else {
+      router.push('/');
+    }
+  };
+
   const handleGoogleSignIn = async () => {
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
-       toast({
-        title: 'Success',
-        description: 'Logged in successfully!',
-      });
-      router.push('/admin');
+      const result = await signInWithPopup(auth, provider);
+      await handleLoginSuccess(result.user);
     } catch (error: any) {
        toast({
         variant: 'destructive',
@@ -58,12 +69,8 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormValues) => {
     const auth = getAuth(app);
     try {
-      await signInWithEmailAndPassword(auth, data.email, data.password);
-      toast({
-        title: 'Success',
-        description: 'Logged in successfully!',
-      });
-      router.push('/admin');
+      const result = await signInWithEmailAndPassword(auth, data.email, data.password);
+      await handleLoginSuccess(result.user);
     } catch (error: any) {
       toast({
         variant: 'destructive',

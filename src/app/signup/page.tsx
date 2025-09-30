@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { getAuth, createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup, User, getAdditionalUserInfo } from "firebase/auth";
+import { doc, setDoc, getDoc, serverTimestamp, collection, getDocs, query, limit } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -19,7 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Bot, Loader2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
-import { app } from '@/lib/firebase';
+import { app, db } from '@/lib/firebase';
 import { Separator } from '@/components/ui/separator';
 
 const signupSchema = z.object({
@@ -37,16 +38,51 @@ export default function SignupPage() {
     resolver: zodResolver(signupSchema),
   });
 
+  const createUserDocument = async (user: User, isNewUser: boolean = false) => {
+    if (!isNewUser) return; // Only run for new signups
+
+    const userDocRef = doc(db, 'users', user.uid);
+
+    // Check if this is the first user ever
+    const usersCollectionRef = collection(db, 'users');
+    const firstUserQuery = query(usersCollectionRef, limit(1));
+    const snapshot = await getDocs(firstUserQuery);
+    const role = snapshot.empty ? 'admin' : 'user';
+
+    await setDoc(userDocRef, {
+      uid: user.uid,
+      name: user.displayName,
+      email: user.email,
+      role: role,
+      joinedAt: serverTimestamp(),
+    });
+  };
+
+  const handleLoginSuccess = async (user: User, isNewUser: boolean) => {
+    if (isNewUser) {
+        await createUserDocument(user, isNewUser);
+    }
+    
+    toast({
+      title: 'Success',
+      description: isNewUser ? 'Account created and logged in!' : 'Logged in successfully!',
+    });
+
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (userDoc.exists() && userDoc.data().role === 'admin') {
+      router.push('/admin');
+    } else {
+      router.push('/');
+    }
+  };
+
   const handleGoogleSignIn = async () => {
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
-       toast({
-        title: 'Account Created',
-        description: "You're now logged in.",
-      });
-      router.push('/admin');
+      const result = await signInWithPopup(auth, provider);
+      const additionalInfo = getAdditionalUserInfo(result);
+      await handleLoginSuccess(result.user, !!additionalInfo?.isNewUser);
     } catch (error: any) {
        toast({
         variant: 'destructive',
@@ -63,6 +99,9 @@ export default function SignupPage() {
       await updateProfile(userCredential.user, {
         displayName: data.name
       });
+      // Now create the user document in Firestore
+      await createUserDocument(userCredential.user, true);
+
       toast({
         title: "Account Created",
         description: "You can now log in.",

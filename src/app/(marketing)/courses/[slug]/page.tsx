@@ -38,6 +38,11 @@ export default function CourseDetailPage({ params }: { params: { slug: string } 
   const [loading, setLoading] = useState(true);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
     async function fetchCourse() {
@@ -59,7 +64,7 @@ export default function CourseDetailPage({ params }: { params: { slug: string } 
     setIsDialogOpen(false);
   };
   
-  if (loading) {
+  if (!hasMounted || loading) {
     // You can replace this with a proper skeleton loader component
     return <div className="flex justify-center items-center h-screen">Loading course...</div>;
   }

@@ -148,8 +148,8 @@ export function DashboardClient({ data }: { data: any }) {
             <div className="space-y-4">
               {recentPosts.length > 0 ? (
                 recentPosts.map((post: BlogPost) => (
-                  <div key={post.id} className="flex items-start gap-4">
-                    <div className="flex-shrink-0 pt-1">
+                  <div key={post.id} className="flex items-center gap-4">
+                    <div className="flex-shrink-0">
                         <Newspaper className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div className="flex-grow">

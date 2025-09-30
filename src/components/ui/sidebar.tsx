@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -67,8 +68,15 @@ const SidebarProvider = React.forwardRef<
     },
     ref
   ) => {
-    const isMobile = useIsMobile()
+    const isMobileValue = useIsMobile()
+    const [isClient, setIsClient] = React.useState(false);
     const [openMobile, setOpenMobile] = React.useState(false)
+
+    React.useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    const isMobile = isClient ? isMobileValue : false;
 
     // This is the internal state of the sidebar.
     // We use openProp and setOpenProp for control from outside the component.
@@ -761,3 +769,5 @@ export {
   SidebarTrigger,
   useSidebar,
 }
+
+    

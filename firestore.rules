@@ -1,86 +1,58 @@
 
 rules_version = '2';
 
-// The admin UID. All admin actions will be checked against this UID.
-// Replace this with the actual UID of harshsharmaqa@gmail.com after they sign up.
-function adminUid() {
-  return "7YCygdl3aITdlmgRHqBrZCzuWcj1";
-}
-
-function isAuth() {
-  return request.auth != null;
-}
-
-function isUser(uid) {
-  return isAuth() && request.auth.uid == uid;
-}
-
-function isAdmin() {
-  return isAuth() && request.auth.uid == adminUid();
-}
-
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    function isAdmin() {
+      // Check if the user making the request has an 'admin' role in their user document.
+      // Important: This requires the user document to exist before checking the role.
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
 
-    // Admins can read/write any user document.
-    // A user can read/write their own user document, but cannot change their own role.
+    function isUser(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
     match /users/{uid} {
+      // Admins can list all users. Individual users can read their own data.
       allow list: if isAdmin();
       allow read: if isUser(uid) || isAdmin();
-      // Allow create for anyone (for signup)
-      allow create: if isAuth(); 
-      // Allow user to update their own info, but not role. Admin can update anything.
-      allow update: if (isUser(uid) && !('role' in request.resource.data)) || isAdmin();
-      // Only admin can delete users
-      allow delete: if isAdmin();
-    }
-
-    // Blogs can be read by anyone.
-    // Only admins can create, update, or delete blogs.
-    match /blogs/{blogId} {
-      allow read: if true;
-      allow write: if isAdmin();
-
-      // Likes subcollection
-      match /likes/{userId} {
-        // Any authenticated user can like/unlike a post.
-        allow create, delete: if isAuth() && request.auth.uid == userId;
-        // No one can read the list of likes directly for privacy, but the count is public via the main listener.
-        allow read, update: if false; 
-      }
-    }
-
-    // Courses can be read by anyone.
-    // Only admins can create, update, or delete courses.
-    match /courses/{courseId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow create;
+      allow write: if isUser(uid) || isAdmin();
     }
     
-    // Custom Pages can be read by anyone.
-    // Only admins can create, update, or delete pages.
-    match /pages/{pageId} {
-       allow read: if true;
-       allow write: if isAdmin();
+    match /blogs/{blogId} {
+      allow read;
+      allow create, update, delete: if isAdmin();
+      
+      match /likes/{userId} {
+        allow read;
+        allow create, delete: if isUser(userId);
+      }
     }
-
-    // Testimonials can be read by anyone.
-    // Only admins can create, update, or delete testimonials.
+    
+    match /courses/{courseId} {
+      allow read;
+      // Admins can list all courses for the dashboard.
+      allow list: if isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+    
     match /testimonials/{testimonialId} {
-      allow read: if true;
-      allow write: if isAdmin();
+        allow read;
+        allow create, update, delete: if isAdmin();
+    }
+    
+    match /pages/{pageId} {
+        allow read;
+        allow create, update, delete: if isAdmin();
     }
 
-    // Site settings can be read by anyone.
-    // Only admins can change site settings.
     match /settings/site {
-      allow read: if true;
+      allow read;
       allow write: if isAdmin();
-    }
-
-    // Lock down any other collections by default
-    match /{document=**} {
-      allow read, write: if false;
     }
   }
 }

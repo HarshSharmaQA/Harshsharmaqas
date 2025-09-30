@@ -16,6 +16,7 @@ import {
   LogOut,
   Star,
   FilePlus,
+  Zap,
 } from 'lucide-react';
 import { getAuth, signOut } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -33,6 +34,8 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { app } from '@/lib/firebase';
+import { useToast } from '@/hooks/use-toast';
+import { useEffect, useState } from 'react';
 
 const menuItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -51,11 +54,33 @@ export default function AdminSidebar() {
   const { toggleSidebar, state } = useSidebar();
   const auth = getAuth(app);
   const [user] = useAuthState(auth);
+  const { toast } = useToast();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    // Check if we need to show the cache cleared toast
+    if (sessionStorage.getItem('cache-cleared')) {
+      toast({
+        title: 'Cache Cleared',
+        description: 'The browser cache has been successfully cleared.',
+      });
+      sessionStorage.removeItem('cache-cleared');
+    }
+  }, [toast]);
+
 
   const handleLogout = () => {
     signOut(auth);
   };
   
+  const handleClearCache = () => {
+    if (isClient) {
+      sessionStorage.setItem('cache-cleared', 'true');
+      window.location.reload();
+    }
+  };
+
   return (
     <Sidebar>
       <SidebarHeader className="flex items-center justify-between">
@@ -95,10 +120,16 @@ export default function AdminSidebar() {
                 <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
             </div>
          </div>
-          <Button onClick={handleLogout} variant="ghost" className={cn("w-full justify-start", state === 'collapsed' && 'justify-center')}>
-            <LogOut className="h-4 w-4 mr-2" />
-            <span className={cn(state === 'collapsed' && 'hidden')}>Logout</span>
-          </Button>
+          <div className="grid grid-cols-2 gap-2">
+            <Button onClick={handleLogout} variant="outline" className={cn("w-full justify-start", state === 'collapsed' && 'justify-center')}>
+                <LogOut className={cn("h-4 w-4", state === 'expanded' && 'mr-2')} />
+                <span className={cn(state === 'collapsed' && 'hidden')}>Logout</span>
+            </Button>
+            <Button onClick={handleClearCache} variant="outline" className={cn("w-full justify-start", state === 'collapsed' && 'justify-center')}>
+                <Zap className={cn("h-4 w-4", state === 'expanded' && 'mr-2')} />
+                <span className={cn(state === 'collapsed' && 'hidden')}>Clear Cache</span>
+            </Button>
+          </div>
       </SidebarFooter>
     </Sidebar>
   );

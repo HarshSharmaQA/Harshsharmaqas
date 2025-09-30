@@ -79,6 +79,7 @@ export default function CourseDetailPage({ params }: { params: { slug: string } 
         onOpenChange={setIsDialogOpen} 
         onEnrollmentSuccess={handleEnrollmentSuccess}
         courseTitle={course.title}
+        courseSlug={course.slug}
        />
       {/* Hero Banner */}
       <section className="relative h-64 md:h-80 w-full">

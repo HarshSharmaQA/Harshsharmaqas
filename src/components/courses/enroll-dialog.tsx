@@ -17,6 +17,8 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const enrollSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -30,9 +32,10 @@ interface EnrollDialogProps {
   onOpenChange: (isOpen: boolean) => void;
   onEnrollmentSuccess: () => void;
   courseTitle: string;
+  courseSlug: string;
 }
 
-export function EnrollDialog({ isOpen, onOpenChange, onEnrollmentSuccess, courseTitle }: EnrollDialogProps) {
+export function EnrollDialog({ isOpen, onOpenChange, onEnrollmentSuccess, courseTitle, courseSlug }: EnrollDialogProps) {
   const { toast } = useToast();
   const form = useForm<EnrollFormValues>({
     resolver: zodResolver(enrollSchema),
@@ -45,15 +48,29 @@ export function EnrollDialog({ isOpen, onOpenChange, onEnrollmentSuccess, course
   const { isSubmitting } = form.formState;
 
   const onSubmit = async (values: EnrollFormValues) => {
-    // Mock enrollment submission
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log('Enrolling user:', values);
-    toast({
-      title: 'Enrollment Successful!',
-      description: `You've been enrolled in "${courseTitle}".`,
-    });
-    onEnrollmentSuccess();
-    form.reset();
+    try {
+      await addDoc(collection(db, 'enrollments'), {
+        ...values,
+        courseTitle,
+        courseSlug,
+        enrolledAt: serverTimestamp(),
+      });
+
+      toast({
+        title: 'Enrollment Successful!',
+        description: `You've been enrolled in "${courseTitle}".`,
+      });
+      onEnrollmentSuccess();
+      form.reset();
+
+    } catch (error) {
+        console.error("Enrollment error: ", error);
+        toast({
+            variant: 'destructive',
+            title: 'Enrollment Failed',
+            description: 'There was an issue processing your enrollment. Please try again.',
+        });
+    }
   };
 
   return (

@@ -11,63 +11,56 @@ import { db } from '@/lib/firebase';
 import { format } from 'date-fns';
 import type { Course } from '@/lib/mock-data';
 import { DashboardClient } from '@/components/admin/dashboard-client';
-
-type User = {
-  uid: string;
-  name: string;
-  email: string;
-  joinedAt: Timestamp;
-};
+import { type BlogPost } from './blogs/page';
 
 async function getDashboardData() {
-    // Fetch all collections in parallel
-    const [userSnapshot, courseSnapshot] = await Promise.all([
-        getDocs(collection(db, 'users')),
-        getDocs(collection(db, 'courses'))
+  // Fetch all collections in parallel
+  const [courseSnapshot, blogSnapshot, testimonialSnapshot] =
+    await Promise.all([
+      getDocs(collection(db, 'courses')),
+      getDocs(query(collection(db, 'blogs'), orderBy('createdAt', 'desc'), limit(5))),
+      getDocs(collection(db, 'testimonials')),
     ]);
 
-    const users = userSnapshot.docs.map(doc => doc.data() as User);
-    const courses = courseSnapshot.docs.map(doc => doc.data() as Course);
+  const courses = courseSnapshot.docs.map(doc => doc.data() as Course);
+  const recentPosts = blogSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPost));
 
-    const totalUsers = users.length;
-    const totalCourses = courses.length;
+  const totalCourses = courses.length;
+  const totalBlogs = blogSnapshot.size;
+  const totalTestimonials = testimonialSnapshot.size;
 
-    // NOTE: Revenue is a simple sum of all course prices. 
-    // This mock calculation assumes each course is sold once.
-    const totalRevenue = courses.reduce((sum, course) => sum + course.price, 0);
+  // NOTE: Revenue is a simple sum of all course prices.
+  // This mock calculation assumes each course is sold once per month for chart data.
+  const totalRevenue = courses.reduce((sum, course) => sum + course.price, 0);
 
-    // Process user growth data
-    const monthlySignups: { [key: string]: { name: string; signups: number } } = {};
-    users.forEach(user => {
-        if (user.joinedAt) {
-            const month = format(user.joinedAt.toDate(), 'MMM');
-            if (!monthlySignups[month]) {
-                monthlySignups[month] = { name: month, signups: 0 };
-            }
-            monthlySignups[month].signups++;
-        }
-    });
+  // Process sales data for chart
+  const monthlySales: { [key: string]: { name: string; sales: number } } = {};
+  // Mocking some sales data based on course prices for the last few months for demonstration
+  const today = new Date();
+  for (let i = 5; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const month = format(d, 'MMM');
+      const monthlyTotal = courses.reduce((sum, course) => {
+        // simple mock logic to generate varied data
+        return sum + course.price * (i + 1) * (Math.random() * 0.5 + 0.8);
+      }, 0);
+      monthlySales[month] = { name: month, sales: Math.round(monthlyTotal) };
+  }
 
-    const chartData = Object.values(monthlySignups).slice(-7); // Get last 7 months of data
+  const chartData = Object.values(monthlySales);
 
-     // Get recent users
-    const recentUsersQuery = query(collection(db, 'users'), orderBy('joinedAt', 'desc'), limit(3));
-    const recentUsersSnapshot = await getDocs(recentUsersQuery);
-    const recentUsers = recentUsersSnapshot.docs.map(doc => doc.data() as User);
-
-
-    return {
-        totalUsers,
-        totalCourses,
-        totalRevenue,
-        chartData,
-        recentUsers,
-    };
+  return {
+    totalCourses,
+    totalRevenue,
+    totalBlogs,
+    totalTestimonials,
+    chartData,
+    recentPosts,
+  };
 }
-
 
 export default async function AdminDashboard() {
   const data = await getDashboardData();
-  
+
   return <DashboardClient data={data} />;
 }

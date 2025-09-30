@@ -43,6 +43,7 @@ export function ImageUploader({ onUrlChange, initialUrl }: ImageUploaderProps) {
 
     setUploading(true);
     setProgress(0);
+    setImageUrl(null); // Clear previous image while uploading new one
     
     const storageRef = ref(storage, `blog-images/${Date.now()}-${file.name}`);
     const uploadTask = uploadBytesResumable(storageRef, file);
@@ -78,7 +79,7 @@ export function ImageUploader({ onUrlChange, initialUrl }: ImageUploaderProps) {
   return (
     <div className="space-y-4">
       <div className="w-full h-64 border-2 border-dashed rounded-lg flex items-center justify-center bg-muted/50 relative overflow-hidden">
-        {imageUrl && !uploading && (
+        {imageUrl && (
           <Image src={imageUrl} alt="Uploaded feature image" fill className="object-cover" />
         )}
         {!imageUrl && !uploading && (

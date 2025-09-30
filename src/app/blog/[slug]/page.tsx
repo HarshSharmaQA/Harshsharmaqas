@@ -13,6 +13,12 @@ import { ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
 import { type BlogPost } from '@/app/admin/blogs/page';
 import loading from './loading';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 async function getPost(slug: string): Promise<BlogPost | null> {
   const q = query(collection(db, 'blogs'), where('slug', '==', slug), limit(1));
@@ -74,9 +80,36 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
+function FaqSchema({ post }: { post: BlogPost }) {
+  if (!post.faqs || post.faqs.length === 0) {
+    return null;
+  }
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": post.faqs.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+    />
+  );
+}
+
 
 export default async function BlogPostPage({ params }: { params: { slug: string } }) {
-  const post = await getPost(params.slug);
+  const awaitedParams = await params;
+  const post = await getPost(awaitedParams.slug);
 
   if (!post) {
     notFound();
@@ -88,6 +121,9 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
 
   return (
     <div>
+        <head>
+          <FaqSchema post={post} />
+        </head>
         <section className="relative h-64 md:h-96 w-full">
             <Image
                 src={imageUrl}
@@ -116,6 +152,20 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
                 {post.content}
                 </div>
             </article>
+
+            {post.faqs && post.faqs.length > 0 && (
+              <section className="mt-16 md:mt-24 max-w-prose mx-auto">
+                <h2 className="text-3xl font-bold font-headline mb-8">Frequently Asked Questions</h2>
+                <Accordion type="single" collapsible className="w-full">
+                  {post.faqs.map((faq, index) => (
+                    <AccordionItem key={index} value={`item-${index}`}>
+                      <AccordionTrigger className="font-semibold text-left">{faq.question}</AccordionTrigger>
+                      <AccordionContent className="text-muted-foreground">{faq.answer}</AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </section>
+            )}
 
             {relatedPosts.length > 0 && (
                 <section className="mt-16 md:mt-24 border-t pt-12">

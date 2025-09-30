@@ -52,6 +52,7 @@ export type BlogPost = {
   seoDescription: string;
   featureImageUrl?: string;
   createdAt: Timestamp;
+  faqs?: { question: string; answer: string }[];
 };
 
 export default function AdminBlogsPage() {

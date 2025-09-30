@@ -1,6 +1,6 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
@@ -17,11 +17,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Trash2 } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { ImageUploader } from '@/components/admin/image-uploader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+const faqSchema = z.object({
+  question: z.string().min(1, 'Question is required.'),
+  answer: z.string().min(1, 'Answer is required.'),
+});
 
 const blogSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
@@ -31,6 +36,7 @@ const blogSchema = z.object({
   featureImageUrl: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
   seoTitle: z.string().min(5, 'SEO title must be at least 5 characters.'),
   seoDescription: z.string().min(10, 'SEO description must be at least 10 characters.'),
+  faqs: z.array(faqSchema).optional(),
 });
 
 type BlogFormValues = z.infer<typeof blogSchema>;
@@ -51,7 +57,13 @@ export default function EditBlogPage() {
       featureImageUrl: '',
       seoTitle: '',
       seoDescription: '',
+      faqs: [],
     },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "faqs",
   });
 
   useEffect(() => {
@@ -163,6 +175,60 @@ export default function EditBlogPage() {
                     </FormItem>
                   )}
                 />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Frequently Asked Questions</CardTitle>
+                <CardDescription>Add FAQs to help readers understand the topic better.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {fields.map((field, index) => (
+                  <div key={field.id} className="p-4 border rounded-md space-y-4 relative">
+                    <FormField
+                      control={form.control}
+                      name={`faqs.${index}.question`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Question</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter the question" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name={`faqs.${index}.answer`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Answer</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="Enter the answer" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => remove(index)}
+                      className="absolute top-2 right-2 h-6 w-6"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => append({ question: '', answer: '' })}
+                >
+                  Add FAQ
+                </Button>
               </CardContent>
             </Card>
           </div>

@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import { Badge } from '../ui/badge';
 
 const navLinks = [
   { href: '/blog', label: 'Blog' },
@@ -35,22 +36,22 @@ export default function Header({ siteName }: { siteName: string }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const auth = getAuth(app);
   const [user, loading] = useAuthState(auth);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [userRole, setUserRole] = useState<'admin' | 'user' | null>(null);
   
   useEffect(() => {
-    const checkAdminRole = async () => {
+    const checkUserRole = async () => {
       if (user) {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (userDoc.exists() && userDoc.data().role === 'admin') {
-          setIsAdmin(true);
+        if (userDoc.exists()) {
+          setUserRole(userDoc.data().role);
         } else {
-          setIsAdmin(false);
+          setUserRole('user');
         }
       } else {
-        setIsAdmin(false);
+        setUserRole(null);
       }
     };
-    checkAdminRole();
+    checkUserRole();
   }, [user]);
 
   const handleLogout = () => {
@@ -141,15 +142,21 @@ export default function Header({ siteName }: { siteName: string }) {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
+                  <div className="flex flex-col space-y-2">
                     <p className="text-sm font-medium leading-none">{user.displayName}</p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {user.email}
                     </p>
+                     {userRole && (
+                      <div className="flex items-center pt-1">
+                        <p className="text-xs leading-none text-muted-foreground">Role:</p>
+                        <Badge variant={userRole === 'admin' ? 'destructive' : 'secondary'} className="ml-2 text-xs capitalize">{userRole}</Badge>
+                      </div>
+                    )}
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {isAdmin && (
+                {userRole === 'admin' && (
                    <DropdownMenuItem asChild>
                     <Link href="/admin">
                       <LayoutDashboard className="mr-2 h-4 w-4" />

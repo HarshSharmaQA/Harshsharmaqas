@@ -1,10 +1,13 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { type BlogPost } from '@/app/admin/blogs/page';
 import { format } from 'date-fns';
+import { useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -17,9 +20,20 @@ async function getRecentPosts(): Promise<BlogPost[]> {
     return postList;
 }
 
-export default async function HomePage() {
-  const posts = await getRecentPosts();
+export default function HomePage() {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
   const fallbackImage = PlaceHolderImages.find(img => img.id === 'course-detail-banner');
+
+  useEffect(() => {
+    getRecentPosts().then(fetchedPosts => {
+      setPosts(fetchedPosts);
+      setLoading(false);
+    }).catch(error => {
+      console.error("Error fetching posts: ", error);
+      setLoading(false);
+    });
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -51,7 +65,11 @@ export default async function HomePage() {
               <p className="text-lg text-muted-foreground mt-2">Check out our newest articles and tutorials.</p>
             </div>
             
-            {posts.length === 0 ? (
+            {loading ? (
+                <div className="flex justify-center items-center py-16">
+                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                </div>
+            ) : posts.length === 0 ? (
                 <div className="text-center py-16">
                     <h2 className="text-2xl font-headline mb-2">No Posts Yet</h2>
                     <p className="text-muted-foreground">The admin hasn't published any posts. Check back soon!</p>

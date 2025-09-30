@@ -26,6 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 const blogSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
   slug: z.string().min(5, 'Slug must be at least 5 characters.').regex(/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens.'),
+  category: z.string().min(3, 'Category must be at least 3 characters.'),
   content: z.string().min(100, 'Content must be at least 100 characters.'),
   featureImageUrl: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
   seoTitle: z.string().min(5, 'SEO title must be at least 5 characters.'),
@@ -45,6 +46,7 @@ export default function EditBlogPage() {
     defaultValues: {
       title: '',
       slug: '',
+      category: '',
       content: '',
       featureImageUrl: '',
       seoTitle: '',
@@ -239,6 +241,22 @@ export default function EditBlogPage() {
                           <FormMessage />
                         </FormItem>
                       )}
+                    />
+                     <FormField
+                        control={form.control}
+                        name="category"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Category</FormLabel>
+                            <FormControl>
+                                <Input placeholder="e.g., Technology, Career" {...field} />
+                            </FormControl>
+                            <FormDescription>
+                                Assign a category to group related posts.
+                            </FormDescription>
+                            <FormMessage />
+                            </FormItem>
+                        )}
                     />
                     <FormField
                       control={form.control}

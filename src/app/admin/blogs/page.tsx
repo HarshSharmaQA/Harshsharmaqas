@@ -22,6 +22,7 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
 import {
   DropdownMenu,
@@ -47,6 +48,7 @@ export type BlogPost = {
   title: string;
   slug: string;
   author: string;
+  category: string;
   seoDescription: string;
   featureImageUrl?: string;
   createdAt: Timestamp;
@@ -102,7 +104,7 @@ export default function AdminBlogsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Title</TableHead>
-                <TableHead>Author</TableHead>
+                <TableHead>Category</TableHead>
                 <TableHead>Date Created</TableHead>
                 <TableHead><span className="sr-only">Actions</span></TableHead>
               </TableRow>
@@ -111,7 +113,7 @@ export default function AdminBlogsPage() {
               {posts.map((post) => (
                 <TableRow key={post.id}>
                   <TableCell className="font-medium">{post.title}</TableCell>
-                  <TableCell>{post.author}</TableCell>
+                  <TableCell><Badge variant="secondary">{post.category}</Badge></TableCell>
                   <TableCell>
                     {post.createdAt ? format(post.createdAt.toDate(), 'PPP') : 'N/A'}
                   </TableCell>

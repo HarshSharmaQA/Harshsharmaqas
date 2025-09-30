@@ -13,7 +13,6 @@ const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/courses', label: 'Courses' },
   { href: '/blog', label: 'Blog' },
-  { href: '/admin', label: 'Admin Panel' },
 ];
 
 export default function Header() {
@@ -58,6 +57,7 @@ export default function Header() {
                       {link.label}
                     </Link>
                   ))}
+                   <Link href="/login" className="text-lg font-medium transition-colors hover:text-primary text-foreground/80">Admin Login</Link>
                 </nav>
               </div>
             </SheetContent>
@@ -65,7 +65,11 @@ export default function Header() {
         </div>
 
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          <nav className="hidden md:flex gap-6">
+          <Link href="/" className="flex items-center gap-2 md:hidden">
+            <Bot className="h-6 w-6 text-primary" />
+            <span className="font-bold font-headline text-lg">QAWala</span>
+          </Link>
+          <nav className="hidden md:flex gap-6 items-center">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -78,15 +82,10 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
+             <Button variant="outline" asChild>
+              <Link href="/login">Admin Login</Link>
+            </Button>
           </nav>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" asChild>
-              <Link href="/login">Login</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/signup">Sign Up</Link>
-            </Button>
-          </div>
         </div>
       </div>
     </header>

@@ -41,7 +41,10 @@ export function ViewEnrollmentsDialog({ isOpen, onOpenChange, course }: ViewEnro
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isOpen || !course.slug) return;
+    if (!isOpen || !course.slug) {
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     const enrollmentsCollectionRef = collection(db, 'courses', course.slug, 'enrollments');

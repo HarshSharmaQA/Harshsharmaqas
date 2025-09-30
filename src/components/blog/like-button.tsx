@@ -32,12 +32,6 @@ export function LikeButton({ postId }: LikeButtonProps) {
         setLikes(snapshot.data().count);
       } catch (error) {
         console.error("Error fetching like count:", error);
-      } finally {
-        // We set loading to false here regardless of user auth status
-        // because the public count has been fetched.
-        if (!user) {
-          setIsLoading(false);
-        }
       }
     };
 
@@ -84,15 +78,16 @@ export function LikeButton({ postId }: LikeButtonProps) {
       return;
     }
     
-    setIsLoading(true);
-    const likeRef = doc(db, 'blogs', postId, 'likes', user.uid);
     const wasLiked = isLiked;
+    // Disable button during operation
+    setIsLoading(true);
 
     // Optimistic UI update
     setIsLiked(!wasLiked);
     setLikes(prev => wasLiked ? prev - 1 : prev + 1);
 
     try {
+        const likeRef = doc(db, 'blogs', postId, 'likes', user.uid);
         if (wasLiked) {
             await deleteDoc(likeRef);
         } else {
@@ -109,7 +104,7 @@ export function LikeButton({ postId }: LikeButtonProps) {
         description: 'There was a problem processing your request.',
       });
     } finally {
-        // Fetch true count from server to ensure consistency, then stop loading.
+        // Fetch true count from server to ensure consistency
         try {
             const likesCol = collection(db, 'blogs', postId, 'likes');
             const snapshot = await getCountFromServer(likesCol);
@@ -117,6 +112,7 @@ export function LikeButton({ postId }: LikeButtonProps) {
         } catch(e) {
             console.error("Could not refetch likes count after update", e);
         }
+        // Re-enable button
         setIsLoading(false);
     }
   };

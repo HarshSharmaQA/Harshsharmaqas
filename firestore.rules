@@ -42,14 +42,9 @@ service cloud.firestore {
 
       // Likes subcollection
       match /likes/{userId} {
-        // Any authenticated user can check if they have liked a post
-        allow get: if isAuth();
-        // Any authenticated user can like/unlike a post.
-        allow create, delete: if isAuth() && request.auth.uid == userId;
-        // Allow counting likes, but not reading the documents.
-        allow list: if request.query.limit == 0;
-        // Do not allow updates to likes, only create/delete
-        allow update: if false; 
+        allow get: if isAuth(); // Allow authenticated users to get their own like status
+        allow create, delete: if isAuth() && request.auth.uid == userId; // Allow user to manage their own like
+        allow list, update: if false; // Deny listing all likes or updating (only create/delete)
       }
     }
 

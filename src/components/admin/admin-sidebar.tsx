@@ -15,6 +15,7 @@ import {
   Newspaper,
   LogOut,
   Star,
+  FilePlus,
 } from 'lucide-react';
 import { getAuth, signOut } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -35,6 +36,7 @@ import { app } from '@/lib/firebase';
 
 const menuItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin/pages', label: 'Pages', icon: FilePlus },
   { href: '/admin/blogs', label: 'Blogs', icon: Newspaper },
   { href: '/admin/content', label: 'Content', icon: FileText },
   { href: '/admin/seo', label: 'SEO', icon: TrendingUp },
@@ -71,7 +73,7 @@ export default function AdminSidebar() {
             <SidebarMenuItem key={item.href}>
               <Link href={item.href}>
                 <SidebarMenuButton
-                  isActive={pathname === item.href}
+                  isActive={pathname.startsWith(item.href) && (item.href === '/admin' ? pathname === item.href : true)}
                   tooltip={{ children: item.label, side: 'right' }}
                 >
                   <item.icon />

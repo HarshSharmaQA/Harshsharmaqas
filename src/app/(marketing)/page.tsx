@@ -7,12 +7,14 @@ import {
   FileText,
   Rocket,
 } from 'lucide-react';
+import { collection, getDocs, query, limit } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { type Course } from '@/lib/mock-data';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { courses } from '@/lib/mock-data';
 
 const features = [
   {
@@ -53,8 +55,16 @@ const testimonials = [
   },
 ];
 
-export default function HomePage() {
+async function getFeaturedCourses(): Promise<Course[]> {
+    const coursesCol = query(collection(db, 'courses'), limit(4));
+    const coursesSnapshot = await getDocs(coursesCol);
+    const courseList = coursesSnapshot.docs.map(doc => doc.data() as Course);
+    return courseList;
+}
+
+export default async function HomePage() {
   const heroImage = PlaceHolderImages.find((img) => img.id === 'hero-image');
+  const courses = await getFeaturedCourses();
   
   return (
     <div className="flex flex-col min-h-screen">
@@ -116,7 +126,7 @@ export default function HomePage() {
               <p className="text-lg text-muted-foreground mt-2">Upskill with industry-leading QA courses.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {courses.slice(0, 4).map((course) => {
+              {courses.map((course) => {
                 const courseImage = PlaceHolderImages.find((img) => img.id === course.imageId);
                 return (
                   <Card key={course.id} className="overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 group">

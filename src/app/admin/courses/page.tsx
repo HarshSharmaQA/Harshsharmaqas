@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Table,
   TableBody,
@@ -14,7 +16,7 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { courses } from '@/lib/mock-data';
+import { type Course } from '@/lib/mock-data';
 import { Badge } from '@/components/ui/badge';
 import { MoreHorizontal } from 'lucide-react';
 import {
@@ -24,8 +26,23 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useEffect, useState } from 'react';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 export default function AdminCoursesPage() {
+  const [courses, setCourses] = useState<Course[]>([]);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'courses'), (snapshot) => {
+      const coursesData = snapshot.docs.map(doc => doc.data() as Course);
+      setCourses(coursesData);
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, []);
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">

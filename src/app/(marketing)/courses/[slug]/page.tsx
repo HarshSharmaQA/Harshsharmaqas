@@ -1,6 +1,8 @@
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { courses } from '@/lib/mock-data';
+import { collection, query, where, getDocs, limit } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { type Course } from '@/lib/mock-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import {
   Accordion,
@@ -14,8 +16,21 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Clock, BarChart2, DollarSign } from 'lucide-react';
 
-export default function CourseDetailPage({ params }: { params: { slug: string } }) {
-  const course = courses.find((c) => c.slug === params.slug);
+async function getCourse(slug: string): Promise<Course | null> {
+  const q = query(collection(db, 'courses'), where('slug', '==', slug), limit(1));
+  const querySnapshot = await getDocs(q);
+  
+  if (querySnapshot.empty) {
+    return null;
+  }
+
+  const courseDoc = querySnapshot.docs[0];
+  return courseDoc.data() as Course;
+}
+
+
+export default async function CourseDetailPage({ params }: { params: { slug: string } }) {
+  const course = await getCourse(params.slug);
 
   if (!course) {
     notFound();

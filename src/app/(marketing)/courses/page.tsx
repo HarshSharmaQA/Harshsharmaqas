@@ -1,14 +1,25 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { collection, getDocs, query } from 'firebase/firestore';
 
-import { courses } from '@/lib/mock-data';
+import { db } from '@/lib/firebase';
+import { type Course } from '@/lib/mock-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export default function CoursesPage() {
+async function getCourses(): Promise<Course[]> {
+    const coursesCol = collection(db, 'courses');
+    const coursesSnapshot = await getDocs(coursesCol);
+    const courseList = coursesSnapshot.docs.map(doc => doc.data() as Course);
+    return courseList;
+}
+
+export default async function CoursesPage() {
+  const courses = await getCourses();
+
   return (
     <div className="container py-12">
       <div className="text-center mb-12">

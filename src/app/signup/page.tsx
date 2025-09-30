@@ -46,13 +46,19 @@ export default function SignupPage() {
     // Only create a new document if one doesn't already exist.
     if (!userDoc.exists()) {
       let role = 'user';
-      // Check if this is the very first user signing up.
-      const usersCollectionRef = collection(db, 'users');
-      const firstUserQuery = query(usersCollectionRef, limit(1));
-      const snapshot = await getDocs(firstUserQuery);
-      // If there are no users, this person becomes an admin.
-      if (snapshot.empty) {
+      
+      // Ensure the primary email is always an admin
+      if (user.email === 'harshsharmaqa@gmail.com') {
         role = 'admin';
+      } else {
+        // Fallback for first-ever user if not the primary admin
+        const usersCollectionRef = collection(db, 'users');
+        const firstUserQuery = query(usersCollectionRef, limit(1));
+        const snapshot = await getDocs(firstUserQuery);
+        // If there are no users, this person becomes an admin.
+        if (snapshot.empty) {
+          role = 'admin';
+        }
       }
 
       await setDoc(userDocRef, {

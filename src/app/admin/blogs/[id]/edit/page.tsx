@@ -82,7 +82,7 @@ export default function EditBlogPage() {
       };
       fetchPost();
     }
-  }, [postId, form, router, toast]);
+  }, [postId, form.reset, router, toast]);
 
   const { isSubmitting, isDirty } = form.formState;
 

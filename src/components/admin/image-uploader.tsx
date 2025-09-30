@@ -8,8 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Image as ImageIcon, Loader2, Link as LinkIcon } from 'lucide-react';
 import Image from 'next/image';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from './card';
 
 interface ImageUploaderProps {
   onUrlChange: (url: string) => void;
@@ -22,6 +24,7 @@ export function ImageUploader({ onUrlChange, initialUrl }: ImageUploaderProps) {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [imageUrl, setImageUrl] = useState(initialUrl || '');
+  const [urlInput, setUrlInput] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -76,6 +79,22 @@ export function ImageUploader({ onUrlChange, initialUrl }: ImageUploaderProps) {
       }
     );
   };
+  
+  const handleUrlSubmit = () => {
+    if (!urlInput) {
+        toast({ variant: 'destructive', title: 'Invalid URL', description: 'Please enter a valid image URL.' });
+        return;
+    }
+    // Simple URL validation
+    try {
+        new URL(urlInput);
+        setImageUrl(urlInput);
+        onUrlChange(urlInput);
+        toast({ title: 'Image URL Set', description: 'The image will be loaded from the provided URL.' });
+    } catch (_) {
+        toast({ variant: 'destructive', title: 'Invalid URL', description: 'Please enter a valid image URL.' });
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -83,8 +102,9 @@ export function ImageUploader({ onUrlChange, initialUrl }: ImageUploaderProps) {
         {uploading ? (
           <div className="w-full max-w-xs p-4 text-center">
             <Loader2 className="mx-auto h-8 w-8 animate-spin mb-2" />
-            <p className="mb-2">Uploading...</p>
+            <p className="mb-2 text-sm font-medium">Uploading...</p>
             <Progress value={progress} />
+            <p className="text-xs text-muted-foreground mt-1">{Math.round(progress)}%</p>
           </div>
         ) : imageUrl ? (
           <Image src={imageUrl} alt="Uploaded feature image" fill className="object-cover" />
@@ -95,10 +115,37 @@ export function ImageUploader({ onUrlChange, initialUrl }: ImageUploaderProps) {
           </div>
         )}
       </div>
-      <Input id="file-upload" type="file" onChange={handleFileChange} disabled={uploading} className="hidden" />
-      <Button type="button" variant="outline" onClick={() => document.getElementById('file-upload')?.click()} disabled={uploading}>
-        {imageUrl ? 'Change Image' : 'Upload Image'}
-      </Button>
+
+       <Tabs defaultValue="upload" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="upload">
+                <ImageIcon className="mr-2 h-4 w-4" />
+                Upload File
+            </TabsTrigger>
+            <TabsTrigger value="url">
+                <LinkIcon className="mr-2 h-4 w-4" />
+                From URL
+            </TabsTrigger>
+        </TabsList>
+        <TabsContent value="upload" className="mt-4">
+             <Input id="file-upload" type="file" onChange={handleFileChange} disabled={uploading} className="hidden" />
+             <Button type="button" variant="outline" className="w-full" onClick={() => document.getElementById('file-upload')?.click()} disabled={uploading}>
+                {imageUrl ? 'Change Image' : 'Select Image to Upload'}
+            </Button>
+        </TabsContent>
+        <TabsContent value="url" className="mt-4">
+            <div className="flex gap-2">
+                <Input 
+                    type="url" 
+                    placeholder="https://example.com/image.png" 
+                    value={urlInput}
+                    onChange={(e) => setUrlInput(e.target.value)}
+                    disabled={uploading}
+                />
+                <Button type="button" onClick={handleUrlSubmit} disabled={uploading}>Set Image</Button>
+            </div>
+        </TabsContent>
+       </Tabs>
     </div>
   );
 }

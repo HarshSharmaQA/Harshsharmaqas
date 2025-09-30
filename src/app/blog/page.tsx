@@ -61,7 +61,7 @@ export default async function BlogPage() {
                   </Link>
                 </div>
                 <CardHeader>
-                  <CardTitle className="font-headline text-xl h-16">
+                  <CardTitle className="font-headline text-xl">
                     <Link href={`/blog/${post.slug}`}>{post.title}</Link>
                   </CardTitle>
                   <CardDescription>
@@ -69,8 +69,8 @@ export default async function BlogPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex-grow flex flex-col">
-                  <p className="text-muted-foreground mb-6 flex-grow text-sm">{post.seoDescription}</p>
-                  <Button asChild variant="outline">
+                  <p className="text-muted-foreground mb-4 flex-grow text-sm">{post.seoDescription}</p>
+                  <Button asChild variant="outline" className="mt-auto">
                     <Link href={`/blog/${post.slug}`}>
                       Read More <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
@@ -85,3 +85,5 @@ export default async function BlogPage() {
     </div>
   );
 }
+
+    

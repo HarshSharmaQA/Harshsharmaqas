@@ -11,6 +11,8 @@ type Page = {
   content: string;
   createdAt: Timestamp;
   slug: string;
+  status: 'draft' | 'published';
+  password?: string;
 };
 
 async function getPage(slug: string): Promise<Page | null> {
@@ -22,7 +24,16 @@ async function getPage(slug: string): Promise<Page | null> {
   }
 
   const pageDoc = querySnapshot.docs[0];
-  return { id: pageDoc.id, ...pageDoc.data() } as Page;
+  const pageData = { id: pageDoc.id, ...pageDoc.data() } as Page;
+  
+  // Do not show draft pages to the public
+  if (pageData.status === 'draft') {
+      return null;
+  }
+
+  // TODO: Add password protection logic here if pageData.password exists
+
+  return pageData;
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {

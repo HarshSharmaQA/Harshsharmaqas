@@ -23,6 +23,7 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
 import {
   DropdownMenu,
@@ -47,6 +48,7 @@ export type Page = {
   id: string;
   title: string;
   slug: string;
+  status: 'draft' | 'published';
   createdAt: Timestamp;
 };
 
@@ -101,6 +103,7 @@ export default function AdminPagesPage() {
               <TableRow>
                 <TableHead>Title</TableHead>
                 <TableHead>Slug</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead>Date Created</TableHead>
                 <TableHead><span className="sr-only">Actions</span></TableHead>
               </TableRow>
@@ -110,6 +113,11 @@ export default function AdminPagesPage() {
                 <TableRow key={page.id}>
                   <TableCell className="font-medium">{page.title}</TableCell>
                   <TableCell>/{page.slug}</TableCell>
+                   <TableCell>
+                    <Badge variant={page.status === 'published' ? 'default' : 'secondary'} className={page.status === 'published' ? 'bg-green-100 text-green-800' : ''}>
+                      {page.status}
+                    </Badge>
+                  </TableCell>
                   <TableCell>
                     {page.createdAt ? format(page.createdAt.toDate(), 'PPP') : 'N/A'}
                   </TableCell>

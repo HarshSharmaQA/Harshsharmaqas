@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -19,11 +20,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const pageSchema = z.object({
   title: z.string().min(2, 'Title must be at least 2 characters.'),
   slug: z.string().min(2, 'Slug must be at least 2 characters.').regex(/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens.'),
   content: z.string().min(10, 'Content must be at least 10 characters.'),
+  status: z.enum(['draft', 'published']).default('draft'),
+  password: z.string().optional(),
 });
 
 type PageFormValues = z.infer<typeof pageSchema>;
@@ -38,6 +42,8 @@ export default function CreatePage() {
       title: '',
       slug: '',
       content: '',
+      status: 'draft',
+      password: '',
     },
   });
 
@@ -129,8 +135,9 @@ export default function CreatePage() {
             <Card>
               <CardHeader>
                 <CardTitle>Page Settings</CardTitle>
+                <CardDescription>Manage visibility and access for this page.</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-6">
                 <FormField
                   control={form.control}
                   name="slug"
@@ -144,6 +151,44 @@ export default function CreatePage() {
                         <Button type="button" variant="outline" size="sm" onClick={generateSlug}>Generate</Button>
                       </div>
                       <FormDescription>The unique URL path for this page.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="draft">Draft</SelectItem>
+                          <SelectItem value="published">Published</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>Draft pages are not visible to the public.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password Protection</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="Leave blank for no password" {...field} value={field.value || ''}/>
+                      </FormControl>
+                      <FormDescription>
+                        Require a password to view this page.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

@@ -21,11 +21,14 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Loader2 } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const pageSchema = z.object({
   title: z.string().min(2, 'Title must be at least 2 characters.'),
   slug: z.string().min(2, 'Slug must be at least 2 characters.').regex(/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens.'),
   content: z.string().min(10, 'Content must be at least 10 characters.'),
+  status: z.enum(['draft', 'published']).default('draft'),
+  password: z.string().optional(),
 });
 
 type PageFormValues = z.infer<typeof pageSchema>;
@@ -42,6 +45,8 @@ export default function EditPage() {
       title: '',
       slug: '',
       content: '',
+      status: 'draft',
+      password: '',
     },
   });
 
@@ -98,7 +103,7 @@ export default function EditPage() {
     <div className="space-y-8">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-8">
             <h1 className="text-3xl font-bold font-headline">Edit Page</h1>
             <Button type="submit" disabled={isSubmitting || !isDirty}>
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -106,7 +111,7 @@ export default function EditPage() {
             </Button>
           </div>
 
-          <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <Card>
                 <CardHeader>
@@ -150,8 +155,9 @@ export default function EditPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Page Settings</CardTitle>
+                   <CardDescription>Manage visibility and access for this page.</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-6">
                   <FormField
                     control={form.control}
                     name="slug"
@@ -165,6 +171,44 @@ export default function EditPage() {
                           <Button type="button" variant="outline" size="sm" onClick={generateSlug}>Generate</Button>
                         </div>
                         <FormDescription>The unique URL path for this page.</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a status" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="draft">Draft</SelectItem>
+                            <SelectItem value="published">Published</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>Draft pages are not visible to the public.</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password Protection</FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="Leave blank for no password" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Require a password to view this page.
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}

@@ -18,6 +18,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { Users, BookOpen, TrendingUp, DollarSign } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 const stats = [
   { title: 'Total Users', value: '1,254', icon: <Users className="h-6 w-6 text-muted-foreground" />, change: '+12%' },

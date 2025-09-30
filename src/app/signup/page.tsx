@@ -42,13 +42,21 @@ export default function SignupPage() {
     if (!isNewUser) return; // Only run for new signups
 
     const userDocRef = doc(db, 'users', user.uid);
+    let role = 'user';
 
-    // Check if this is the first user ever
-    const usersCollectionRef = collection(db, 'users');
-    const firstUserQuery = query(usersCollectionRef, limit(1));
-    const snapshot = await getDocs(firstUserQuery);
-    const role = snapshot.empty ? 'admin' : 'user';
-
+    // Assign 'admin' role to the specified email
+    if (user.email === 'harshsharmaqa@gmail.com') {
+      role = 'admin';
+    } else {
+      // For other users, check if they are the first user
+      const usersCollectionRef = collection(db, 'users');
+      const firstUserQuery = query(usersCollectionRef, limit(1));
+      const snapshot = await getDocs(firstUserQuery);
+      if (snapshot.empty) {
+        role = 'admin';
+      }
+    }
+    
     await setDoc(userDocRef, {
       uid: user.uid,
       name: user.displayName,
@@ -82,7 +90,12 @@ export default function SignupPage() {
     try {
       const result = await signInWithPopup(auth, provider);
       const additionalInfo = getAdditionalUserInfo(result);
-      await handleLoginSuccess(result.user, !!additionalInfo?.isNewUser);
+      // We need to check if the user document already exists before calling handleLoginSuccess
+      const userDocRef = doc(db, 'users', result.user.uid);
+      const userDoc = await getDoc(userDocRef);
+      const isNewUser = !userDoc.exists();
+      
+      await handleLoginSuccess(result.user, isNewUser);
     } catch (error: any) {
        toast({
         variant: 'destructive',
@@ -107,7 +120,7 @@ export default function SignupPage() {
         description: "You can now log in.",
       });
       router.push('/login');
-    } catch (error: any) {
+    } catch (error: any) => {
       toast({
         variant: "destructive",
         title: "Signup Failed",

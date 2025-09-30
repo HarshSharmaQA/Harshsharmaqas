@@ -1,42 +1,71 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
+  
     // Helper Functions
-    function isSignedIn() {
-      return request.auth != null;
+    function isAdmin() {
+      // Check for admin role via custom claims in a real app.
+      // For this app, we check the email.
+      return request.auth.token.email == 'harshsharmaqa@gmail.com';
     }
 
+    function isUser(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // Collection Rules
     match /users/{uid} {
-      allow read, write: if isSignedIn();
+      // Admins can read/write any user document.
+      // Users can read/write their own document.
+      allow read, write: if isAdmin() || isUser(uid);
+      
+      // Admins can list all users.
+      allow list: if isAdmin();
+    }
+
+    match /courses/{slug} {
+      // Anyone can read courses.
+      allow read: if true;
+      // Only admins can create, update, or delete courses.
+      allow write: if isAdmin();
+      // Admins can list all courses.
+      allow list: if isAdmin();
     }
     
-    match /courses/{slug} {
-      allow read;
-      allow list: if isSignedIn();
-      allow write: if isSignedIn();
-    }
-
     match /blogs/{postId} {
-      allow read;
-      allow create, update, delete: if isSignedIn();
-      
+      // Anyone can read blog posts.
+      allow read: if true;
+      // Only admins can write blog posts.
+      allow write: if isAdmin();
+
       match /likes/{userId} {
-        allow read, write: if isSignedIn();
+        // Any authenticated user can like/unlike a post.
+        allow write: if request.auth != null;
+        // Anyone can see who liked a post.
+        allow read: if true;
       }
     }
     
     match /pages/{pageId} {
-        allow read;
-        allow create, update, delete: if isSignedIn();
-    }
-    
-    match /testimonials/{testimonialId} {
-        allow read, write: if isSignedIn();
+        // Anyone can read a published page
+        allow get: if resource.data.status == 'published';
+        // Admins can manage all pages
+        allow read, write: if isAdmin();
     }
 
     match /settings/site {
-        allow read;
-        allow write: if isSignedIn();
+      // Anyone can read site settings (for site name, etc.)
+      allow read: if true;
+      // Only admins can change site settings
+      allow write: if isAdmin();
+    }
+    
+    match /testimonials/{testimonialId} {
+       // Anyone can read testimonials
+      allow read: if true;
+      // Only admins can write testimonials
+      allow write: if isAdmin();
     }
   }
 }

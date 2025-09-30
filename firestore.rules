@@ -3,40 +3,57 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper function to check if the user is an admin
+    // Function to check if user is an admin
     function isAdmin() {
-      // In a real app, you'd have a 'roles' collection or custom claims.
-      // For this demo, we'll hardcode the admin's email.
-      return request.auth != null && request.auth.token.email == 'harshsharmaqa@gmail.com';
+      // Check if the user is authenticated and if their user document shows they are an admin.
+      return request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // USERS:
-    // - Anyone can read user profiles.
-    // - Authenticated users can create their own user document.
-    // - Only the user themselves can update their document.
-    match /users/{userId} {
-      allow read;
-      allow create: if request.auth.uid == userId;
-      allow update: if request.auth.uid == userId;
-      // Deleting users should be handled carefully, maybe only by admins.
-      allow delete: if isAdmin();
-    }
-    
-    // CONTENT (Blogs, Pages, Settings, Testimonials, Courses):
-    // - Anyone can read.
-    // - Only admins can write (create, update, delete).
-    match /{collection}/{docId} 
-      where collection in ['blogs', 'pages', 'settings', 'testimonials', 'courses'] {
-      allow read;
+    // Rules for blogs
+    match /blogs/{blogId} {
+      allow read: if true;
       allow write: if isAdmin();
     }
 
-    // ENROLLMENTS:
-    // - Anyone can create an enrollment document (for the public form).
-    // - Only admins can read or delete enrollment records.
-    match /courses/{courseId}/enrollments/{enrollmentId} {
-        allow create;
-        allow read, delete: if isAdmin();
+    // Rules for pages
+    match /pages/{pageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Rules for settings
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Rules for testimonials
+    match /testimonials/{testimonialId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Rules for courses and their subcollections
+    match /courses/{courseId} {
+      allow read: if true;
+      allow write: if isAdmin();
+
+      // Allow anyone to enroll in a course, but only admins can see/manage enrollments
+      match /enrollments/{enrollmentId} {
+        allow create: if true;
+        allow read, update, delete: if isAdmin();
+      }
+    }
+
+    // Rules for user documents
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      // Allow users to create their own document upon signup
+      allow create: if request.auth.uid == userId;
+      // Allow users to update their own document
+      allow update: if request.auth.uid == userId;
+      // Only admins can delete user documents
+      allow delete: if isAdmin();
     }
   }
 }

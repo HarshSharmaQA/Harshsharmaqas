@@ -42,7 +42,8 @@ export default function CourseDetailPage({ params }: { params: { slug: string } 
   useEffect(() => {
     async function fetchCourse() {
       try {
-        const courseData = await getCourse(params.slug);
+        const awaitedParams = await params;
+        const courseData = await getCourse(awaitedParams.slug);
         setCourse(courseData);
       } catch (error) {
         console.error("Failed to fetch course", error);
@@ -51,7 +52,7 @@ export default function CourseDetailPage({ params }: { params: { slug: string } 
       }
     }
     fetchCourse();
-  }, [params.slug]);
+  }, [params]);
 
   const handleEnrollmentSuccess = () => {
     setIsEnrolled(true);

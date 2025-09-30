@@ -18,15 +18,11 @@ const firebaseConfig = {
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 
-// Initialize Analytics if it's supported
+// Initialize Analytics if it's supported, but don't block app load
 if (typeof window !== 'undefined') {
   isSupported().then(supported => {
     if (supported) {
-      try {
-        getAnalytics(app);
-      } catch (error) {
-        console.log('Failed to initialize Analytics', error);
-      }
+      getAnalytics(app);
     }
   });
 }

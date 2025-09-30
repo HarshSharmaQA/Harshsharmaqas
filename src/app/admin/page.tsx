@@ -23,7 +23,17 @@ async function getDashboardData() {
     ]);
 
   const courses = courseSnapshot.docs.map(doc => doc.data() as Course);
-  const recentPosts = blogSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPost));
+  // Convert Timestamp to a serializable format (string)
+  const recentPosts = blogSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return { 
+          id: doc.id, 
+          ...data,
+          // Convert timestamp to string before passing to client component
+          createdAt: data.createdAt.toDate().toISOString(),
+      } as unknown as BlogPost;
+  });
+
 
   const totalCourses = courses.length;
   const totalBlogs = blogSnapshot.size;

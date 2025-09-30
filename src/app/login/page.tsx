@@ -74,8 +74,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <Link href="/" className="absolute top-4 left-4 flex items-center gap-2 text-lg font-semibold font-headline md:top-8 md:left-8">
+    <div className="flex min-h-screen items-center justify-center p-4 bg-background">
+      <Link href="/" className="absolute top-4 left-4 flex items-center gap-2 text-lg font-semibold font-headline md:top-8 md:left-8 text-foreground">
         <Bot className="h-6 w-6 text-primary" />
         <span>QAWala</span>
       </Link>
@@ -101,9 +101,15 @@ export default function LoginPage() {
               {isSubmitting ? 'Logging in...' : 'Login with Email'}
             </Button>
           </form>
-          <div className="relative">
-            <Separator />
-            <p className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-2 bg-card text-muted-foreground text-sm">OR</p>
+          <div className="relative my-2">
+            <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">
+                OR
+                </span>
+            </div>
           </div>
            <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
              <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 126 21.2 173.4 58.2L359.3 127.1c-24.3-23.8-58.2-38.2-97.3-38.2-74.6 0-135.3 60.7-135.3 135.3s60.7 135.3 135.3 135.3c82.3 0 119.4-49.3 123.4-74.6H248v-90.2h239.2c1.2 12.8 1.8 26.9 1.8 42.8z"></path></svg>

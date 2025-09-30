@@ -5,12 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
+import Image from 'next/image';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 type BlogPost = {
   id: string;
   title: string;
   slug: string;
   seoDescription: string;
+  featureImageUrl?: string;
   createdAt: {
     seconds: number;
     nanoseconds: number;
@@ -26,6 +29,7 @@ async function getBlogPosts(): Promise<BlogPost[]> {
 
 export default async function BlogPage() {
   const posts = await getBlogPosts();
+  const fallbackImage = PlaceHolderImages.find(img => img.id === 'course-detail-banner');
 
   return (
     <div className="bg-background">
@@ -42,16 +46,28 @@ export default async function BlogPage() {
            </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {posts.map((post) => (
-              <Card key={post.id} className="flex flex-col shadow-md hover:shadow-xl transition-shadow duration-300">
+            {posts.map((post) => {
+                const imageUrl = post.featureImageUrl || fallbackImage?.imageUrl || "https://picsum.photos/seed/blog/400/250";
+                return (
+              <Card key={post.id} className="flex flex-col shadow-md hover:shadow-xl transition-shadow duration-300 group">
+                <div className="overflow-hidden rounded-t-lg">
+                  <Image
+                    src={imageUrl}
+                    alt={post.title}
+                    width={400}
+                    height={250}
+                    className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-105"
+                    data-ai-hint="blog post image"
+                  />
+                </div>
                 <CardHeader>
-                  <CardTitle className="font-headline text-2xl h-20">{post.title}</CardTitle>
+                  <CardTitle className="font-headline text-xl h-16">{post.title}</CardTitle>
                   <CardDescription>
-                    {format(new Date(post.createdAt.seconds * 1000), 'MMMM d, yyyy')}
+                    {post.createdAt ? format(new Date(post.createdAt.seconds * 1000), 'MMMM d, yyyy') : ''}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex-grow flex flex-col">
-                  <p className="text-muted-foreground mb-6 flex-grow">{post.seoDescription}</p>
+                  <p className="text-muted-foreground mb-6 flex-grow text-sm">{post.seoDescription}</p>
                   <Button asChild variant="outline">
                     <Link href={`/blog/${post.slug}`}>
                       Read More <ArrowRight className="ml-2 h-4 w-4" />
@@ -59,7 +75,8 @@ export default async function BlogPage() {
                   </Button>
                 </CardContent>
               </Card>
-            ))}
+            );
+            })}
           </div>
         )}
       </div>

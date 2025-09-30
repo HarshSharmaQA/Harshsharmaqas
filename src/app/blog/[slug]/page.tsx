@@ -2,12 +2,16 @@ import { notFound } from 'next/navigation';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { format } from 'date-fns';
+import Image from 'next/image';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 type BlogPost = {
   title: string;
   content: string;
   seoTitle: string;
   seoDescription: string;
+  featureImageUrl?: string;
+  author: string;
   createdAt: {
     seconds: number;
     nanoseconds: number;
@@ -33,22 +37,36 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
     notFound();
   }
 
+  const fallbackImage = PlaceHolderImages.find(img => img.id === 'course-detail-banner');
+  const imageUrl = post.featureImageUrl || fallbackImage?.imageUrl || "https://picsum.photos/seed/blog-detail/1200/600";
+
   return (
-    <div className="container py-12 md:py-16">
-      <article className="prose prose-lg dark:prose-invert mx-auto">
-        <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold font-headline !mb-2">{post.title}</h1>
-            <p className="text-muted-foreground">
-                Posted on {format(new Date(post.createdAt.seconds * 1000), 'MMMM d, yyyy')}
-            </p>
+    <div>
+        <section className="relative h-64 md:h-96 w-full">
+            <Image
+                src={imageUrl}
+                alt={post.title}
+                fill
+                className="object-cover"
+                data-ai-hint="blog post image"
+            />
+            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+            <div className="text-center text-white p-4 max-w-4xl">
+                <h1 className="text-4xl md:text-6xl font-bold font-headline">{post.title}</h1>
+                <p className="text-lg mt-4">
+                    By {post.author} on {format(new Date(post.createdAt.seconds * 1000), 'MMMM d, yyyy')}
+                </p>
+            </div>
+            </div>
+        </section>
+
+        <div className="container py-12 md:py-16">
+            <article className="prose prose-lg dark:prose-invert mx-auto">
+                <div className="whitespace-pre-wrap text-foreground">
+                {post.content}
+                </div>
+            </article>
         </div>
-        
-        {/* We can use dangerouslySetInnerHTML here if content contains HTML, or just render it directly if it's markdown/plain text */}
-        {/* For now, let's treat it as plain text and wrap it in a div that preserves whitespace */}
-        <div className="whitespace-pre-wrap text-foreground">
-          {post.content}
-        </div>
-      </article>
     </div>
   );
 }

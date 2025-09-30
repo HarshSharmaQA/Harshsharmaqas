@@ -1,172 +1,164 @@
 'use client';
 
-import { useState }from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { collection, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { MoreHorizontal, PlusCircle } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
-const blogSchema = z.object({
-  title: z.string().min(5, 'Title must be at least 5 characters.'),
-  slug: z.string().min(5, 'Slug must be at least 5 characters.').regex(/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens.'),
-  content: z.string().min(100, 'Content must be at least 100 characters.'),
-  seoTitle: z.string().min(5, 'SEO title must be at least 5 characters.'),
-  seoDescription: z.string().min(10, 'SEO description must be at least 10 characters.'),
-});
-
-type BlogFormValues = z.infer<typeof blogSchema>;
+export type BlogPost = {
+  id: string;
+  title: string;
+  slug: string;
+  author: string;
+  createdAt: {
+    seconds: number;
+    nanoseconds: number;
+  };
+};
 
 export default function AdminBlogsPage() {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const { toast } = useToast();
-  const form = useForm<BlogFormValues>({
-    resolver: zodResolver(blogSchema),
-    defaultValues: {
-      title: '',
-      slug: '',
-      content: '',
-      seoTitle: '',
-      seoDescription: '',
-    },
-  });
 
-  const { isSubmitting } = form.formState;
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'blogs'), (snapshot) => {
+      const postsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPost));
+      setPosts(postsData);
+    });
+    return () => unsubscribe();
+  }, []);
 
-  const onSubmit = async (values: BlogFormValues) => {
+  const handleDelete = async (postId: string) => {
     try {
-      await addDoc(collection(db, 'blogs'), {
-        ...values,
-        createdAt: serverTimestamp(),
-      });
+      await deleteDoc(doc(db, 'blogs', postId));
       toast({
-        title: 'Blog Post Created!',
-        description: 'Your new blog post has been saved successfully.',
+        title: 'Post Deleted',
+        description: 'The blog post has been successfully deleted.',
       });
-      form.reset();
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'There was a problem creating the blog post.',
+        description: 'There was a problem deleting the post.',
       });
     }
   };
 
-  const generateSlug = () => {
-    const title = form.getValues('title');
-    const slug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .slice(0, 50);
-    form.setValue('slug', slug);
-  };
-
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold font-headline">Create Blog Post</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold font-headline">Manage Blog Posts</h1>
+        <Button asChild>
+          <Link href="/admin/blogs/create">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Create Post
+          </Link>
+        </Button>
+      </div>
       <Card>
         <CardHeader>
-          <CardTitle>New Blog Post</CardTitle>
-          <CardDescription>Fill out the form to create a new blog post.</CardDescription>
+          <CardTitle>Blog Post List</CardTitle>
+          <CardDescription>A list of all blog posts on the platform.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Your amazing blog post title" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="slug"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL Slug</FormLabel>
-                    <div className="flex items-center gap-2">
-                      <FormControl>
-                        <Input placeholder="your-amazing-blog-post-title" {...field} />
-                      </FormControl>
-                      <Button type="button" variant="outline" onClick={generateSlug}>Generate</Button>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="content"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Content</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Write your blog post here..." {...field} rows={15} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <h2 className="text-2xl font-bold font-headline border-t pt-6">SEO Settings</h2>
-
-              <FormField
-                control={form.control}
-                name="seoTitle"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>SEO Title</FormLabel>
-                    <FormControl>
-                      <Input placeholder="A catchy title for search engines" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="seoDescription"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>SEO Description</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="A concise and compelling description for search engine result pages." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isSubmitting ? 'Publishing...' : 'Publish Post'}
-              </Button>
-            </form>
-          </Form>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Title</TableHead>
+                <TableHead>Author</TableHead>
+                <TableHead>Date Created</TableHead>
+                <TableHead><span className="sr-only">Actions</span></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {posts.map((post) => (
+                <TableRow key={post.id}>
+                  <TableCell className="font-medium">{post.title}</TableCell>
+                  <TableCell>{post.author}</TableCell>
+                  <TableCell>
+                    {post.createdAt ? format(new Date(post.createdAt.seconds * 1000), 'PPP') : 'N/A'}
+                  </TableCell>
+                  <TableCell>
+                    <AlertDialog>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button aria-haspopup="true" size="icon" variant="ghost">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Toggle menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/admin/blogs/${post.id}/edit`}>Edit</Link>
+                          </DropdownMenuItem>
+                           <AlertDialogTrigger asChild>
+                            <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                          </AlertDialogTrigger>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the post
+                            &quot;{post.title}&quot;.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(post.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>

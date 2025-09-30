@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Bot } from 'lucide-react';
+import { Bot, Loader2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { app } from '@/lib/firebase';
 
@@ -39,7 +39,10 @@ export default function SignupPage() {
   const onSubmit = async (data: SignupFormValues) => {
     const auth = getAuth(app);
     try {
-      await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      await updateProfile(userCredential.user, {
+        displayName: data.name
+      });
       toast({
         title: "Account Created",
         description: "You can now log in.",
@@ -83,6 +86,7 @@ export default function SignupPage() {
               {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
             </div>
             <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isSubmitting ? 'Creating Account...' : 'Create Account'}
             </Button>
           </form>

@@ -156,7 +156,7 @@ export function DashboardClient({ data }: { data: any }) {
                       <p className="text-sm font-medium leading-tight truncate">{post.title}</p>
                       <p className="text-xs text-muted-foreground">
                         {post.createdAt
-                          ? format(post.createdAt.toDate(), 'MMMM d, yyyy')
+                          ? format(new Date(post.createdAt.seconds * 1000), 'MMMM d, yyyy')
                           : 'Just now'}
                       </p>
                     </div>

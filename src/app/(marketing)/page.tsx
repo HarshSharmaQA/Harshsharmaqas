@@ -2,37 +2,84 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Loader2, Linkedin, Twitter, Github } from 'lucide-react';
+import { ArrowRight, Loader2, Linkedin, Twitter, Github, Star } from 'lucide-react';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { type BlogPost } from '@/app/admin/blogs/page';
 import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
+import { type Course } from '@/lib/mock-data';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
 
 async function getRecentPosts(): Promise<BlogPost[]> {
-    const postsCol = query(collection(db, 'blogs'), orderBy('createdAt', 'desc'), limit(6));
+    const postsCol = query(collection(db, 'blogs'), orderBy('createdAt', 'desc'), limit(3));
     const postsSnapshot = await getDocs(postsCol);
     const postList = postsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPost));
     return postList;
 }
 
+async function getFeaturedCourses(): Promise<Course[]> {
+    const coursesCol = query(collection(db, 'courses'), limit(3));
+    const coursesSnapshot = await getDocs(coursesCol);
+    const courseList = coursesSnapshot.docs.map(doc => doc.data() as Course);
+    return courseList;
+}
+
+const testimonials = [
+  { 
+    id: 'testimonial-1',
+    name: 'Sarah J.', 
+    role: 'Aspiring SDET', 
+    quote: "The Manual Testing Masterclass was a game-changer for me. I landed my first QA job just weeks after completing the course!",
+    stars: 5,
+  },
+  { 
+    id: 'testimonial-2',
+    name: 'Mike R.', 
+    role: 'Senior QA Engineer', 
+    quote: "Harsh's blog posts on automation frameworks are my go-to resource. The insights are practical and immediately applicable.",
+    stars: 5,
+  },
+  { 
+    id: 'testimonial-3',
+    name: 'David L.', 
+    role: 'QA Lead', 
+    quote: "I recommend QAWala to my entire team. The content is top-notch and always up-to-date with industry best practices.",
+    stars: 5,
+  },
+];
+
+
 export default function HomePage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(true);
+  const [loadingCourses, setLoadingCourses] = useState(true);
+
   const fallbackImage = PlaceHolderImages.find(img => img.id === 'course-detail-banner');
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
 
   useEffect(() => {
     getRecentPosts().then(fetchedPosts => {
       setPosts(fetchedPosts);
-      setLoading(false);
+      setLoadingPosts(false);
     }).catch(error => {
       console.error("Error fetching posts: ", error);
-      setLoading(false);
+      setLoadingPosts(false);
+    });
+
+    getFeaturedCourses().then(fetchedCourses => {
+      setCourses(fetchedCourses);
+      setLoadingCourses(false);
+    }).catch(error => {
+      console.error("Error fetching courses: ", error);
+      setLoadingCourses(false);
     });
   }, []);
 
@@ -60,13 +107,13 @@ export default function HomePage() {
                 </Button>
                 <div className="flex items-center gap-2">
                    <Button variant="outline" size="icon" asChild>
-                     <Link href="#"><Linkedin /></Link>
+                     <Link href="#" target="_blank"><Linkedin /></Link>
                    </Button>
                    <Button variant="outline" size="icon" asChild>
-                     <Link href="#"><Twitter /></Link>
+                     <Link href="#" target="_blank"><Twitter /></Link>
                    </Button>
                    <Button variant="outline" size="icon" asChild>
-                     <Link href="#"><Github /></Link>
+                     <Link href="#" target="_blank"><Github /></Link>
                    </Button>
                 </div>
               </div>
@@ -86,15 +133,122 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Courses Section */}
+        <section id="featured-courses" className="py-16 md:py-24 bg-card">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold font-headline">Featured Courses</h2>
+              <p className="text-lg text-muted-foreground mt-2">Kickstart your career with our most popular courses.</p>
+            </div>
+            
+            {loadingCourses ? (
+                <div className="flex justify-center items-center py-16">
+                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                </div>
+            ) : courses.length === 0 ? (
+                <div className="text-center py-16">
+                    <h2 className="text-2xl font-headline mb-2">Courses Coming Soon!</h2>
+                    <p className="text-muted-foreground">New courses are being prepared. Check back soon!</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {courses.map((course) => {
+                    const courseImage = PlaceHolderImages.find((img) => img.id === course.imageId);
+                    return (
+                      <Card key={course.id} className="overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col group bg-background">
+                        {courseImage && (
+                          <div className="overflow-hidden">
+                              <Image
+                                src={courseImage.imageUrl}
+                                alt={course.title}
+                                width={400}
+                                height={250}
+                                className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-105"
+                                data-ai-hint={courseImage.imageHint}
+                              />
+                          </div>
+                        )}
+                        <CardHeader>
+                          <div className="flex justify-between items-center">
+                              <Badge variant="secondary" className="capitalize">{course.level}</Badge>
+                              <p className="text-lg font-bold text-primary">${course.price}</p>
+                          </div>
+                          <CardTitle className="font-headline pt-2 h-16">{course.title}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex-grow flex flex-col">
+                          <p className="text-muted-foreground text-sm mb-4 flex-grow">{course.description}</p>
+                          <Button variant="outline" asChild className="w-full mt-auto">
+                            <Link href={`/courses/${course.slug}`}>
+                              View Details <ArrowRight className="ml-2 h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+            )}
+            <div className="text-center mt-12">
+                <Button size="lg" asChild>
+                    <Link href="/courses">View All Courses</Link>
+                </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonials Section */}
+        <section id="testimonials" className="py-16 md:py-24 bg-background">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold font-headline">What People Are Saying</h2>
+              <p className="text-lg text-muted-foreground mt-2">Hear from professionals who have grown with QAWala.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {testimonials.map((testimonial) => {
+                const image = PlaceHolderImages.find(img => img.id === testimonial.id);
+                return (
+                  <Card key={testimonial.id} className="bg-card flex flex-col justify-between">
+                    <CardHeader>
+                       <div className="flex items-center gap-4">
+                          {image && (
+                            <Avatar className="h-14 w-14">
+                              <AvatarImage src={image.imageUrl} alt={testimonial.name} data-ai-hint={image.imageHint} />
+                              <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                          )}
+                          <div>
+                            <p className="font-bold">{testimonial.name}</p>
+                            <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                          </div>
+                       </div>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                      <p className="text-muted-foreground italic">&quot;{testimonial.quote}&quot;</p>
+                    </CardContent>
+                     <CardContent>
+                       <div className="flex items-center gap-1">
+                          {Array(testimonial.stars).fill(0).map((_, i) => (
+                            <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                          ))}
+                        </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+
         {/* Blog Section */}
         <section id="latest-posts" className="py-16 md:py-24 bg-card">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold font-headline">Latest Posts</h2>
+              <h2 className="text-3xl md:text-4xl font-bold font-headline">Latest From The Blog</h2>
               <p className="text-lg text-muted-foreground mt-2">Check out my newest articles and tutorials.</p>
             </div>
             
-            {loading ? (
+            {loadingPosts ? (
                 <div className="flex justify-center items-center py-16">
                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
                 </div>
@@ -152,3 +306,5 @@ export default function HomePage() {
     </div>
   );
 }
+
+    

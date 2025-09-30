@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -46,8 +47,10 @@ export default function SignupPage() {
     if (!userDoc.exists()) {
       let role = 'user';
       
+      const adminEmails = ['harshsharmaqa@gmail.com', 'admin@example.com'];
+
       // Ensure the primary email is always an admin
-      if (user.email === 'harshsharmaqa@gmail.com') {
+      if (adminEmails.includes(user.email || '')) {
         role = 'admin';
       } else {
         // Fallback for first-ever user if not the primary admin

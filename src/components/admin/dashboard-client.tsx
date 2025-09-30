@@ -29,99 +29,8 @@ import { Button } from '../ui/button';
 import { format } from 'date-fns';
 import { type BlogPost } from '@/app/admin/blogs/page';
 import { useEffect, useState } from 'react';
-import {
-  collection,
-  getDocs,
-  query,
-  orderBy,
-  limit,
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import type { Course } from '@/lib/mock-data';
+import { getDashboardData, type DashboardData } from '@/lib/data';
 import { Skeleton } from '../ui/skeleton';
-
-interface DashboardData {
-  totalCourses: number;
-  totalRevenue: number;
-  totalBlogs: number;
-  totalTestimonials: number;
-  chartData: { name: string; sales: number }[];
-  recentPosts: BlogPost[];
-}
-
-async function getDashboardData(): Promise<DashboardData> {
-  // Fetch all collections in parallel
-  const [courseSnapshot, blogSnapshot, testimonialSnapshot] =
-    await Promise.all([
-      getDocs(collection(db, 'courses')),
-      getDocs(query(collection(db, 'blogs'), orderBy('createdAt', 'desc'), limit(5))),
-      getDocs(collection(db, 'testimonials')),
-    ]);
-
-  const courses = courseSnapshot.docs.map(doc => doc.data() as Course);
-  // Convert Timestamp to a serializable format (string)
-  const recentPosts = blogSnapshot.docs.map(doc => {
-      const data = doc.data();
-      // Ensure createdAt is handled correctly, even if it's null
-      const createdAt = data.createdAt ? data.createdAt.toDate().toISOString() : new Date().toISOString();
-      const post: BlogPost = {
-        id: doc.id,
-        title: data.title,
-        slug: data.slug,
-        author: data.author,
-        category: data.category,
-        seoDescription: data.seoDescription,
-        createdAt: {
-          toDate: () => new Date(createdAt),
-          // Keep other Timestamp properties if needed, or mock them
-          seconds: data.createdAt ? data.createdAt.seconds : Math.floor(new Date(createdAt).getTime() / 1000),
-          nanoseconds: data.createdAt ? data.createdAt.nanoseconds : 0,
-        },
-      };
-      if (data.featureImageUrl) {
-        post.featureImageUrl = data.featureImageUrl;
-      }
-       if (data.faqs) {
-        post.faqs = data.faqs;
-      }
-      return post;
-  });
-
-
-  const totalCourses = courses.length;
-  const totalBlogs = blogSnapshot.size;
-  const totalTestimonials = testimonialSnapshot.size;
-
-  // NOTE: Revenue is a simple sum of all course prices.
-  // This mock calculation assumes each course is sold once per month for chart data.
-  const totalRevenue = courses.reduce((sum, course) => sum + (course.price || 0), 0);
-
-  // Process sales data for chart
-  const monthlySales: { [key: string]: { name: string; sales: number } } = {};
-  // Mocking some sales data based on course prices for the last few months for demonstration
-  const today = new Date();
-  for (let i = 5; i >= 0; i--) {
-      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-      const month = format(d, 'MMM');
-      const monthlyTotal = courses.reduce((sum, course) => {
-        // simple mock logic to generate varied data
-        return sum + (course.price || 0) * (i + 1) * (Math.random() * 0.5 + 0.8);
-      }, 0);
-      monthlySales[month] = { name: month, sales: Math.round(monthlyTotal) };
-  }
-
-  const chartData = Object.values(monthlySales);
-
-  return {
-    totalCourses,
-    totalRevenue,
-    totalBlogs,
-    totalTestimonials,
-    chartData,
-    recentPosts,
-  };
-}
-
 
 export function DashboardClient() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -129,7 +38,6 @@ export function DashboardClient() {
 
   useEffect(() => {
     async function fetchData() {
-      if (!data) { // Only fetch data if it hasn't been fetched yet
         try {
           const dashboardData = await getDashboardData();
           setData(dashboardData);
@@ -138,12 +46,9 @@ export function DashboardClient() {
         } finally {
           setLoading(false);
         }
-      } else {
-        setLoading(false);
-      }
     }
     fetchData();
-  }, [data]);
+  }, []);
 
   const stats = [
     {

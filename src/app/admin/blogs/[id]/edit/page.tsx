@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -159,22 +160,34 @@ export default function EditBlogPage() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="content"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Content</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Write your blog post here. Use markdown for formatting." {...field} rows={20} />
-                      </FormControl>
-                      <FormDescription>
-                        Supports markdown for rich text editing. Character count: {content.length}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                 <Tabs defaultValue="editor" className="w-full">
+                  <TabsList>
+                    <TabsTrigger value="editor">Editor</TabsTrigger>
+                    <TabsTrigger value="preview">Preview</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="editor">
+                    <FormField
+                      control={form.control}
+                      name="content"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="sr-only">Content</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="Write your blog post here. HTML is supported." {...field} rows={20} />
+                          </FormControl>
+                          <FormDescription>
+                            HTML is supported for rich text editing. Character count: {content.length}
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+                  <TabsContent value="preview">
+                    <div className="prose dark:prose-invert rounded-md border min-h-[445px] p-4" dangerouslySetInnerHTML={{ __html: content }} />
+                    <FormDescription>This is a preview of how your content will look.</FormDescription>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
             <Card>
@@ -350,3 +363,5 @@ export default function EditBlogPage() {
     </div>
   );
 }
+
+    

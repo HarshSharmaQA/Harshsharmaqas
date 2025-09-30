@@ -145,10 +145,10 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
            <div className="max-w-prose mx-auto mb-8 flex items-center justify-end gap-2">
               <ShareButton post={{title: post.title, seoDescription: post.seoDescription}} />
           </div>
-          <article className="prose prose-lg dark:prose-invert mx-auto">
-              <div className="whitespace-pre-wrap text-foreground">
-              {post.content}
-              </div>
+          <article 
+            className="prose prose-lg dark:prose-invert mx-auto"
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          >
           </article>
 
           {post.faqs && post.faqs.length > 0 && (
@@ -209,3 +209,5 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
     </div>
   );
 }
+
+    

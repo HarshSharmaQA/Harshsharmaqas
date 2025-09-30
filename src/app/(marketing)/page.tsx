@@ -1,9 +1,10 @@
+
 'use client';
 
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Loader2, Linkedin, Twitter, Github, Star } from 'lucide-react';
-import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, limit, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { type BlogPost } from '@/app/admin/blogs/page';
 import { format } from 'date-fns';
@@ -16,6 +17,22 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
+type Testimonial = {
+  id: string;
+  name: string;
+  role: string;
+  quote: string;
+  stars: number;
+};
+
+type SiteSettings = {
+  heroTitle: string;
+  heroSubtitle: string;
+  heroDescription: string;
+  socialTwitter: string;
+  socialLinkedin: string;
+  socialGithub: string;
+};
 
 async function getRecentPosts(): Promise<BlogPost[]> {
     const postsCol = query(collection(db, 'blogs'), orderBy('createdAt', 'desc'), limit(3));
@@ -31,56 +48,48 @@ async function getFeaturedCourses(): Promise<Course[]> {
     return courseList;
 }
 
-const testimonials = [
-  { 
-    id: 'testimonial-1',
-    name: 'Sarah J.', 
-    role: 'Aspiring SDET', 
-    quote: "The Manual Testing Masterclass was a game-changer for me. I landed my first QA job just weeks after completing the course!",
-    stars: 5,
-  },
-  { 
-    id: 'testimonial-2',
-    name: 'Mike R.', 
-    role: 'Senior QA Engineer', 
-    quote: "Harsh's blog posts on automation frameworks are my go-to resource. The insights are practical and immediately applicable.",
-    stars: 5,
-  },
-  { 
-    id: 'testimonial-3',
-    name: 'David L.', 
-    role: 'QA Lead', 
-    quote: "I recommend QAWala to my entire team. The content is top-notch and always up-to-date with industry best practices.",
-    stars: 5,
-  },
-];
+async function getTestimonials(): Promise<Testimonial[]> {
+  const testimonialsCol = query(collection(db, 'testimonials'), orderBy('name'), limit(3));
+  const testimonialsSnapshot = await getDocs(testimonialsCol);
+  const testimonialList = testimonialsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Testimonial));
+  return testimonialList;
+}
 
 
 export default function HomePage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
-  const [loadingPosts, setLoadingPosts] = useState(true);
-  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
+  
+  const [loading, setLoading] = useState(true);
+
 
   const fallbackImage = PlaceHolderImages.find(img => img.id === 'course-detail-banner');
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
 
   useEffect(() => {
-    getRecentPosts().then(fetchedPosts => {
-      setPosts(fetchedPosts);
-      setLoadingPosts(false);
-    }).catch(error => {
-      console.error("Error fetching posts: ", error);
-      setLoadingPosts(false);
-    });
-
-    getFeaturedCourses().then(fetchedCourses => {
-      setCourses(fetchedCourses);
-      setLoadingCourses(false);
-    }).catch(error => {
-      console.error("Error fetching courses: ", error);
-      setLoadingCourses(false);
-    });
+    const fetchData = async () => {
+      try {
+        const [postsData, coursesData, testimonialsData, settingsData] = await Promise.all([
+          getRecentPosts(),
+          getFeaturedCourses(),
+          getTestimonials(),
+          getDoc(doc(db, 'settings', 'site'))
+        ]);
+        setPosts(postsData);
+        setCourses(coursesData);
+        setTestimonials(testimonialsData);
+        if (settingsData.exists()) {
+          setSettings(settingsData.data() as SiteSettings);
+        }
+      } catch (error) {
+        console.error("Error fetching homepage data: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
   return (
@@ -91,13 +100,13 @@ export default function HomePage() {
           <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="order-2 md:order-1">
               <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4">
-                Harsh Sharma
+                {settings?.heroTitle || 'Harsh Sharma'}
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground mb-6">
-                Software Development Engineer In Test (SDET)
+                {settings?.heroSubtitle || 'Software Development Engineer In Test (SDET)'}
               </p>
               <p className="text-muted-foreground mb-8">
-                I write about testing, development, and career growth. Join me on a journey to build better software.
+                {settings?.heroDescription || 'I write about testing, development, and career growth. Join me on a journey to build better software.'}
               </p>
               <div className="flex items-center gap-4">
                 <Button size="lg" asChild>
@@ -107,13 +116,13 @@ export default function HomePage() {
                 </Button>
                 <div className="flex items-center gap-2">
                    <Button variant="outline" size="icon" asChild>
-                     <Link href="#" target="_blank"><Linkedin /></Link>
+                     <Link href={settings?.socialLinkedin || '#'} target="_blank"><Linkedin /></Link>
                    </Button>
                    <Button variant="outline" size="icon" asChild>
-                     <Link href="#" target="_blank"><Twitter /></Link>
+                     <Link href={settings?.socialTwitter || '#'} target="_blank"><Twitter /></Link>
                    </Button>
                    <Button variant="outline" size="icon" asChild>
-                     <Link href="#" target="_blank"><Github /></Link>
+                     <Link href={settings?.socialGithub || '#'} target="_blank"><Github /></Link>
                    </Button>
                 </div>
               </div>
@@ -141,7 +150,7 @@ export default function HomePage() {
               <p className="text-lg text-muted-foreground mt-2">Kickstart your career with our most popular courses.</p>
             </div>
             
-            {loadingCourses ? (
+            {loading ? (
                 <div className="flex justify-center items-center py-16">
                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
                 </div>
@@ -203,39 +212,50 @@ export default function HomePage() {
               <h2 className="text-3xl md:text-4xl font-bold font-headline">What People Are Saying</h2>
               <p className="text-lg text-muted-foreground mt-2">Hear from professionals who have grown with QAWala.</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {testimonials.map((testimonial) => {
-                const image = PlaceHolderImages.find(img => img.id === testimonial.id);
-                return (
-                  <Card key={testimonial.id} className="bg-card flex flex-col justify-between">
-                    <CardHeader>
-                       <div className="flex items-center gap-4">
-                          {image && (
-                            <Avatar className="h-14 w-14">
-                              <AvatarImage src={image.imageUrl} alt={testimonial.name} data-ai-hint={image.imageHint} />
-                              <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                          )}
-                          <div>
-                            <p className="font-bold">{testimonial.name}</p>
-                            <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                          </div>
-                       </div>
-                    </CardHeader>
-                    <CardContent className="flex-grow">
-                      <p className="text-muted-foreground italic">&quot;{testimonial.quote}&quot;</p>
-                    </CardContent>
-                     <CardContent>
-                       <div className="flex items-center gap-1">
-                          {Array(testimonial.stars).fill(0).map((_, i) => (
-                            <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                          ))}
+            {loading ? (
+                <div className="flex justify-center items-center py-16">
+                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                </div>
+            ) : testimonials.length === 0 ? (
+                <div className="text-center py-16 text-muted-foreground">
+                    <p>No testimonials yet. Be the first to share your success story!</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {testimonials.map((testimonial) => {
+                    const imageId = `testimonial-${testimonial.id}`;
+                    const image = PlaceHolderImages.find(img => img.id === imageId) || PlaceHolderImages.find(img => img.id === 'testimonial-1');
+                    return (
+                    <Card key={testimonial.id} className="bg-card flex flex-col justify-between">
+                        <CardHeader>
+                        <div className="flex items-center gap-4">
+                            {image && (
+                                <Avatar className="h-14 w-14">
+                                <AvatarImage src={image.imageUrl} alt={testimonial.name} data-ai-hint={image.imageHint} />
+                                <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                            )}
+                            <div>
+                                <p className="font-bold">{testimonial.name}</p>
+                                <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                            </div>
                         </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+                        </CardHeader>
+                        <CardContent className="flex-grow">
+                        <p className="text-muted-foreground italic">&quot;{testimonial.quote}&quot;</p>
+                        </CardContent>
+                        <CardContent>
+                        <div className="flex items-center gap-1">
+                            {Array(testimonial.stars).fill(0).map((_, i) => (
+                                <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                            ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                    );
+                })}
+                </div>
+            )}
           </div>
         </section>
 
@@ -248,7 +268,7 @@ export default function HomePage() {
               <p className="text-lg text-muted-foreground mt-2">Check out my newest articles and tutorials.</p>
             </div>
             
-            {loadingPosts ? (
+            {loading ? (
                 <div className="flex justify-center items-center py-16">
                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
                 </div>
@@ -306,5 +326,3 @@ export default function HomePage() {
     </div>
   );
 }
-
-    

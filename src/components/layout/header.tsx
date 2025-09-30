@@ -1,9 +1,10 @@
+
 'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Bot, Menu, X, Twitter, Github, Linkedin, LogOut, LayoutDashboard } from 'lucide-react';
+import { Bot, Menu, LogOut, LayoutDashboard } from 'lucide-react';
 import { getAuth, signOut } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -35,9 +36,17 @@ export default function Header() {
   const auth = getAuth(app);
   const [user, loading] = useAuthState(auth);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [siteName, setSiteName] = useState('QAWala');
 
   useEffect(() => {
-    const checkAdmin = async () => {
+    const checkAdminAndSettings = async () => {
+      // Fetch Site Settings
+      const settingsDoc = await getDoc(doc(db, 'settings', 'site'));
+      if (settingsDoc.exists()) {
+        setSiteName(settingsDoc.data().siteName || 'QAWala');
+      }
+
+      // Check User Role
       if (user) {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists() && userDoc.data().role === 'admin') {
@@ -49,7 +58,7 @@ export default function Header() {
         setIsAdmin(false);
       }
     };
-    checkAdmin();
+    checkAdminAndSettings();
   }, [user]);
 
   const handleLogout = () => {
@@ -72,7 +81,7 @@ export default function Header() {
               <div className="p-4">
                 <Link href="/" className="flex items-center gap-2 mb-8" onClick={() => setIsMobileMenuOpen(false)}>
                   <Bot className="h-6 w-6 text-primary" />
-                  <span className="font-bold font-headline text-lg">QAWala</span>
+                  <span className="font-bold font-headline text-lg">{siteName}</span>
                 </Link>
                 <nav className="flex flex-col gap-4">
                   {navLinks.map((link) => (
@@ -98,7 +107,7 @@ export default function Header() {
         <div className="mr-auto hidden md:flex">
           <Link href="/" className="flex items-center gap-2">
             <Bot className="h-6 w-6 text-primary" />
-            <span className="font-bold font-headline text-lg">QAWala</span>
+            <span className="font-bold font-headline text-lg">{siteName}</span>
           </Link>
         </div>
         
@@ -106,7 +115,7 @@ export default function Header() {
         <div className="flex-1 flex justify-center md:hidden">
             <Link href="/" className="flex items-center gap-2">
                 <Bot className="h-6 w-6 text-primary" />
-                <span className="font-bold font-headline text-lg">QAWala</span>
+                <span className="font-bold font-headline text-lg">{siteName}</span>
             </Link>
         </div>
 

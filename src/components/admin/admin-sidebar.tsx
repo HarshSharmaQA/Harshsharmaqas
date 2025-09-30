@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -13,6 +14,7 @@ import {
   PanelLeft,
   Newspaper,
   LogOut,
+  Star,
 } from 'lucide-react';
 import { getAuth, signOut } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -37,6 +39,7 @@ const menuItems = [
   { href: '/admin/content', label: 'Content', icon: FileText },
   { href: '/admin/seo', label: 'SEO', icon: TrendingUp },
   { href: '/admin/courses', label: 'Courses', icon: BookOpen },
+  { href: '/admin/testimonials', label: 'Testimonials', icon: Star },
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];

@@ -1,5 +1,4 @@
 
-// Import the functions you need from the SDKs you need
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAnalytics, isSupported } from "firebase/analytics";
@@ -13,7 +12,6 @@ const firebaseConfig = {
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
-  databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
 };
 
 // Initialize Firebase
@@ -24,7 +22,11 @@ const db = getFirestore(app);
 if (typeof window !== 'undefined') {
   isSupported().then(supported => {
     if (supported) {
-      getAnalytics(app);
+      try {
+        getAnalytics(app);
+      } catch (error) {
+        console.log('Failed to initialize Analytics', error);
+      }
     }
   });
 }

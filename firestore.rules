@@ -20,40 +20,54 @@ function isAdmin() {
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    match /users/{uid} {
-      allow list: if request.auth != null && request.auth.uid == '7YCygdl3aITdlmgRHqBrZCzuWcj1';
-      allow read: if isUser(uid) || isAdmin();
-      allow create: if isAuth(); 
-      allow update: if (isUser(uid) && !('role' in request.resource.data)) || isAdmin();
-      allow delete: if isAdmin();
+    // Admins can read (get/list) the entire collection.
+    // Individual users can read/write their own document.
+    match /users/{document=**} {
+      allow read, write: if isAdmin();
     }
 
+    match /users/{uid} {
+      // isUser check allows a user to read their own document.
+      allow read: if isUser(uid);
+      // Allow create for any authenticated user during sign-up.
+      allow create: if isAuth(); 
+      // Allow user to update their own info (but not their role).
+      allow update: if isUser(uid) && !('role' in request.resource.data);
+    }
+    
+    // Admins can read (get/list) the entire collection.
+    match /courses/{document=**} {
+        allow read: if true;
+        allow write: if isAdmin();
+    }
+
+    // Blogs can be read by anyone.
+    // Only admins can create, update, or delete blogs.
     match /blogs/{blogId} {
       allow read: if true;
       allow write: if isAdmin();
 
+      // Likes subcollection
       match /likes/{userId} {
-        allow create, delete: if isAuth() && request.auth.uid == userId;
-        allow read, list, update: if false; 
+        // Any authenticated user can like/unlike a post.
+        allow create, delete: if isUser(userId);
+        allow read, update: if false; 
       }
     }
-
-    match /courses/{courseId} {
-      allow read: if true;
-      allow list: if request.auth != null && request.auth.uid == '7YCygdl3aITdlmgRHqBrZCzuWcj1';
-      allow write: if isAdmin();
-    }
     
+    // Custom Pages can be read by anyone.
     match /pages/{pageId} {
        allow read: if true;
        allow write: if isAdmin();
     }
 
+    // Testimonials can be read by anyone.
     match /testimonials/{testimonialId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
+    // Site settings can be read by anyone.
     match /settings/site {
       allow read: if true;
       allow write: if isAdmin();

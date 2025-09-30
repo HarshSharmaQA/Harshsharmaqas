@@ -22,23 +22,28 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (loading) {
+      // Still loading authentication state, do nothing yet.
       return;
     }
     if (!user) {
+      // If no user is found, redirect to login.
       router.replace('/login');
       return;
     }
 
+    // Check if the authenticated user is the admin.
     if (user.email === ADMIN_EMAIL) {
       setIsAdmin(true);
     } else {
-      // Non-admin users are redirected away. A toast is not critical here.
+      // If the user is not an admin, redirect them to the homepage.
       router.replace('/');
     }
+    // Finished checking.
     setIsChecking(false);
   }, [user, loading, router]);
 
-  if (loading || isChecking) {
+  // While checking authentication and admin status, show a loading spinner.
+  if (isChecking) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -46,9 +51,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     );
   }
 
+  // If the user is not an admin, show a loading spinner while redirecting.
   if (!isAdmin) {
-    // This state is temporary while router.replace('/') is processed.
-    // A loading indicator is appropriate.
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -57,6 +61,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     );
   }
 
+  // If the user is an admin, render the admin layout.
   return (
     <SidebarProvider>
       <AdminSidebar />

@@ -33,6 +33,7 @@ const settingsSchema = z.object({
   socialTwitter: z.string().url().optional().or(z.literal('')),
   socialLinkedin: z.string().url().optional().or(z.literal('')),
   socialGithub: z.string().url().optional().or(z.literal('')),
+  metaKeywords: z.string().optional(),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
@@ -52,6 +53,7 @@ export default function AdminSettingsPage() {
       socialTwitter: '',
       socialLinkedin: '',
       socialGithub: '',
+      metaKeywords: '',
     },
   });
 
@@ -121,6 +123,28 @@ export default function AdminSettingsPage() {
                                 <Input type="email" placeholder="admin@qawala.com" {...field} />
                             </FormControl>
                             <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                </CardContent>
+            </Card>
+            
+            <Card>
+                <CardHeader>
+                <CardTitle>Global SEO Settings</CardTitle>
+                <CardDescription>These settings apply to all pages unless overridden.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                <FormField
+                    control={form.control}
+                    name="metaKeywords"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Global Meta Keywords</FormLabel>
+                            <FormControl>
+                                <Textarea placeholder="e.g., QA, testing, automation, career" {...field} />
+                            </FormControl>
+                             <FormMessage />
                         </FormItem>
                     )}
                 />

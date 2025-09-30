@@ -11,7 +11,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Image as ImageIcon, Loader2, Link as LinkIcon } from 'lucide-react';
 import Image from 'next/image';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent } from './card';
 
 interface ImageUploaderProps {
   onUrlChange: (url: string) => void;
@@ -85,7 +84,6 @@ export function ImageUploader({ onUrlChange, initialUrl }: ImageUploaderProps) {
         toast({ variant: 'destructive', title: 'Invalid URL', description: 'Please enter a valid image URL.' });
         return;
     }
-    // Simple URL validation
     try {
         new URL(urlInput);
         setImageUrl(urlInput);

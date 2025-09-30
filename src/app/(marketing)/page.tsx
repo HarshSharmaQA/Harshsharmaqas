@@ -2,12 +2,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Linkedin, Twitter, Github, Star } from 'lucide-react';
-import { collection, getDocs, query, orderBy, limit, doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import { type BlogPost } from '@/app/admin/blogs/page';
 import { format } from 'date-fns';
-import { type Course } from '@/lib/mock-data';
 
+import { getHomepageData } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -15,57 +12,13 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { Metadata } from 'next';
 
-type Testimonial = {
-  id: string;
-  name: string;
-  role: string;
-  quote: string;
-  stars: number;
-};
-
-type SiteSettings = {
-  heroTitle: string;
-  heroSubtitle: string;
-  heroDescription: string;
-  heroImageUrl?: string;
-  socialTwitter: string;
-  socialLinkedin: string;
-  socialGithub: string;
-  siteName: string;
-};
-
-async function getRecentPosts(): Promise<BlogPost[]> {
-    const postsCol = query(collection(db, 'blogs'), orderBy('createdAt', 'desc'), limit(3));
-    const postsSnapshot = await getDocs(postsCol);
-    const postList = postsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPost));
-    return postList;
-}
-
-async function getFeaturedCourses(): Promise<Course[]> {
-    const coursesCol = query(collection(db, 'courses'), limit(3));
-    const coursesSnapshot = await getDocs(coursesCol);
-    const courseList = coursesSnapshot.docs.map(doc => doc.data() as Course);
-    return courseList;
-}
-
-async function getTestimonials(): Promise<Testimonial[]> {
-  const testimonialsCol = query(collection(db, 'testimonials'), orderBy('name'), limit(3));
-  const testimonialsSnapshot = await getDocs(testimonialsCol);
-  const testimonialList = testimonialsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Testimonial));
-  return testimonialList;
-}
-
-async function getSettings(): Promise<SiteSettings | null> {
-    const docRef = doc(db, 'settings', 'site');
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-        return docSnap.data() as SiteSettings;
-    }
-    return null;
+async function getSettingsForMetadata() {
+    const { settings } = await getHomepageData();
+    return settings;
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSettings();
+  const settings = await getSettingsForMetadata();
   return {
     title: settings?.siteName || 'QAWala - Expert QA & Testing Resources',
     description: settings?.heroDescription || 'The #1 destination for QA professionals and aspirants. Enhance your skills with our courses and tools.',
@@ -74,12 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 
 export default async function HomePage() {
-  const [posts, courses, testimonials, settings] = await Promise.all([
-    getRecentPosts(),
-    getFeaturedCourses(),
-    getTestimonials(),
-    getSettings()
-  ]);
+  const { posts, courses, testimonials, settings } = await getHomepageData();
 
   const fallbackImage = PlaceHolderImages.find(img => img.id === 'course-detail-banner');
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');

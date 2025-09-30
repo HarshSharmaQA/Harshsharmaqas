@@ -138,7 +138,11 @@ export default function AdminSidebar() {
                 </React.Suspense>
                 <span className={cn(state === 'collapsed' && 'hidden')}>Logout</span>
             </Button>
-            <Button onClick={handleClearCache} variant="outline" className={cn("w-full justify-start", state === 'collapsed' && 'justify-center')}>
+            <Button 
+                onClick={handleClearCache}
+                variant="default"
+                className={cn("w-full justify-start bg-black text-white hover:bg-green-600", state === 'collapsed' && 'justify-center')}
+            >
                 <React.Suspense fallback={<IconLoadingSkeleton />}>
                   <Zap className={cn("h-4 w-4", state === 'expanded' && 'mr-2')} />
                 </React.Suspense>

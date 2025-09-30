@@ -21,6 +21,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ImageUploader } from '@/components/admin/image-uploader';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 const blogSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
@@ -37,7 +38,7 @@ export default function CreateBlogPage() {
   const { toast } = useToast();
   const router = useRouter();
   const auth = getAuth(app);
-  const user = auth.currentUser;
+  const [user, loading] = useAuthState(auth);
 
   const form = useForm<BlogFormValues>({
     resolver: zodResolver(blogSchema),
@@ -75,6 +76,7 @@ export default function CreateBlogPage() {
       });
       router.push('/admin/blogs');
     } catch (error) {
+      console.error("Error creating blog post: ", error);
       toast({
         variant: 'destructive',
         title: 'Error',
@@ -195,8 +197,8 @@ export default function CreateBlogPage() {
                 )}
               />
               
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Button type="submit" disabled={isSubmitting || loading}>
+                {(isSubmitting || loading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isSubmitting ? 'Publishing...' : 'Publish Post'}
               </Button>
             </form>

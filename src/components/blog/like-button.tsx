@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,7 +7,7 @@ import { collection, doc, onSnapshot, writeBatch, getDoc, serverTimestamp, delet
 import { getAuth } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { Button } from '@/components/ui/button';
-import { Heart } from 'lucide-react';
+import { Heart, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
@@ -88,7 +89,11 @@ export function LikeButton({ postId }: LikeButtonProps) {
       disabled={loading}
       className="flex items-center gap-2"
     >
-      <Heart className={cn('h-4 w-4', isLiked && 'fill-red-500 text-red-500')} />
+      {loading ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        <Heart className={cn('h-4 w-4', isLiked && 'fill-red-500 text-red-500')} />
+      )}
       <span>{likes}</span>
     </Button>
   );

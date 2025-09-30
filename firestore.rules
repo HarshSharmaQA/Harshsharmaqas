@@ -1,71 +1,42 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-  
-    // Helper Functions
-    function isAdmin() {
-      // Check for admin role via custom claims in a real app.
-      // For this app, we check the email.
-      return request.auth.token.email == 'harshsharmaqa@gmail.com';
-    }
 
-    function isUser(uid) {
-      return request.auth != null && request.auth.uid == uid;
-    }
-
-    // Collection Rules
     match /users/{uid} {
-      // Admins can read/write any user document.
-      // Users can read/write their own document.
-      allow read, write: if isAdmin() || isUser(uid);
-      
-      // Admins can list all users.
-      allow list: if isAdmin();
-    }
-
-    match /courses/{slug} {
-      // Anyone can read courses.
-      allow read: if true;
-      // Only admins can create, update, or delete courses.
-      allow write: if isAdmin();
-      // Admins can list all courses.
-      allow list: if isAdmin();
+      allow read, write: if request.auth != null && (request.auth.uid == uid || request.auth.email == 'harshsharmaqa@gmail.com');
+      allow list: if request.auth != null && request.auth.email == 'harshsharmaqa@gmail.com';
     }
     
-    match /blogs/{postId} {
-      // Anyone can read blog posts.
-      allow read: if true;
-      // Only admins can write blog posts.
-      allow write: if isAdmin();
-
+    match /blogs/{blogId} {
+      allow read;
+      allow create, update, delete: if request.auth != null && request.auth.email == 'harshsharmaqa@gmail.com';
+      
       match /likes/{userId} {
-        // Any authenticated user can like/unlike a post.
-        allow write: if request.auth != null;
-        // Anyone can see who liked a post.
-        allow read: if true;
+        allow read;
+        allow create, delete: if request.auth != null && request.auth.uid == userId;
       }
     }
     
-    match /pages/{pageId} {
-        // Anyone can read a published page
-        allow get: if resource.data.status == 'published';
-        // Admins can manage all pages
-        allow read, write: if isAdmin();
-    }
-
-    match /settings/site {
-      // Anyone can read site settings (for site name, etc.)
-      allow read: if true;
-      // Only admins can change site settings
-      allow write: if isAdmin();
+    match /courses/{courseId} {
+      allow read;
+      allow create, update, delete: if request.auth != null && request.auth.email == 'harshsharmaqa@gmail.com';
     }
     
     match /testimonials/{testimonialId} {
-       // Anyone can read testimonials
-      allow read: if true;
-      // Only admins can write testimonials
-      allow write: if isAdmin();
+      allow read;
+      allow create, update, delete: if request.auth != null && request.auth.email == 'harshsharmaqa@gmail.com';
+    }
+    
+    match /pages/{pageId} {
+      allow read;
+      allow create, update, delete: if request.auth != null && request.auth.email == 'harshsharmaqa@gmail.com';
+    }
+
+    match /settings/site {
+      allow read;
+      allow write: if request.auth != null && request.auth.email == 'harshsharmaqa@gmail.com';
     }
   }
 }

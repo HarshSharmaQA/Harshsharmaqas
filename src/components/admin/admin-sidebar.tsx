@@ -84,7 +84,7 @@ export default function AdminSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="flex items-center justify-between">
+      <SidebarHeader className="flex items-center justify-between p-2">
         <Link href="/admin" className={cn("flex items-center gap-2", state === 'collapsed' && 'hidden')}>
           <React.Suspense fallback={<IconLoadingSkeleton />}>
             <Bot className="h-6 w-6 text-primary" />
@@ -117,7 +117,7 @@ export default function AdminSidebar() {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="border-t flex flex-col gap-4 p-2">
-         <div className="flex items-center gap-3">
+         <div className="flex items-center gap-3 p-2">
             <Avatar className={cn(state === 'collapsed' && 'mx-auto')}>
                 <AvatarImage src={user?.photoURL || "https://picsum.photos/seed/admin/100/100"} data-ai-hint="person portrait" />
                 <AvatarFallback>{user?.displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase()}</AvatarFallback>

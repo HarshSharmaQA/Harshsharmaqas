@@ -13,7 +13,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -52,22 +51,23 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = () => {
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      // This function needs to handle both new and existing users.
-      // We will check for an existing user document in the signup page's version of this function.
-      // For login, we can assume the user exists.
-      await handleLoginSuccess(result.user);
-    } catch (error: any) {
-       toast({
-        variant: 'destructive',
-        title: 'Login Failed',
-        description: error.message,
+    signInWithPopup(auth, provider)
+      .then(async (result) => {
+        // This function needs to handle both new and existing users.
+        // We will check for an existing user document in the signup page's version of this function.
+        // For login, we can assume the user exists.
+        await handleLoginSuccess(result.user);
+      })
+      .catch((error) => {
+        toast({
+          variant: 'destructive',
+          title: 'Login Failed',
+          description: error.message,
+        });
       });
-    }
   };
 
   const onSubmit = async (data: LoginFormValues) => {

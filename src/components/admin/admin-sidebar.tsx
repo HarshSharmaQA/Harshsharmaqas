@@ -3,21 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  Bot,
-  LayoutDashboard,
-  FileText,
-  TrendingUp,
-  BookOpen,
-  Users,
-  Settings,
-  PanelLeft,
-  Newspaper,
-  LogOut,
-  Star,
-  FilePlus,
-  Zap,
-} from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { getAuth, signOut } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -37,6 +23,24 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { app, db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState } from 'react';
+import { Skeleton } from '../ui/skeleton';
+
+// Dynamically import icons to reduce chunk size
+const Bot = dynamic(() => import('lucide-react').then(mod => mod.Bot));
+const LayoutDashboard = dynamic(() => import('lucide-react').then(mod => mod.LayoutDashboard));
+const FileText = dynamic(() => import('lucide-react').then(mod => mod.FileText));
+const TrendingUp = dynamic(() => import('lucide-react').then(mod => mod.TrendingUp));
+const BookOpen = dynamic(() => import('lucide-react').then(mod => mod.BookOpen));
+const Users = dynamic(() => import('lucide-react').then(mod => mod.Users));
+const Settings = dynamic(() => import('lucide-react').then(mod => mod.Settings));
+const PanelLeft = dynamic(() => import('lucide-react').then(mod => mod.PanelLeft));
+const Newspaper = dynamic(() => import('lucide-react').then(mod => mod.Newspaper));
+const LogOut = dynamic(() => import('lucide-react').then(mod => mod.LogOut));
+const Star = dynamic(() => import('lucide-react').then(mod => mod.Star));
+const FilePlus = dynamic(() => import('lucide-react').then(mod => mod.FilePlus));
+const Zap = dynamic(() => import('lucide-react').then(mod => mod.Zap));
+
+const IconLoadingSkeleton = () => <Skeleton className="h-4 w-4" />;
 
 const menuItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -105,11 +109,15 @@ export default function AdminSidebar() {
     <Sidebar>
       <SidebarHeader className="flex items-center justify-between">
         <Link href="/admin" className={cn("flex items-center gap-2", state === 'collapsed' && 'hidden')}>
-          <Bot className="h-6 w-6 text-primary" />
+          <React.Suspense fallback={<IconLoadingSkeleton />}>
+            <Bot className="h-6 w-6 text-primary" />
+          </React.Suspense>
           <span className="font-bold font-headline text-lg">QAWala</span>
         </Link>
         <Button variant="ghost" size="icon" onClick={toggleSidebar} className={cn(state === 'collapsed' && 'mx-auto')}>
-          <PanelLeft />
+          <React.Suspense fallback={<IconLoadingSkeleton />}>
+            <PanelLeft />
+          </React.Suspense>
         </Button>
       </SidebarHeader>
       <SidebarContent>
@@ -121,7 +129,9 @@ export default function AdminSidebar() {
                   isActive={pathname.startsWith(item.href) && (item.href === '/admin' ? pathname === item.href : true)}
                   tooltip={{ children: item.label, side: 'right' }}
                 >
-                  <item.icon />
+                  <React.Suspense fallback={<IconLoadingSkeleton />}>
+                    <item.icon />
+                  </React.Suspense>
                   <span>{item.label}</span>
                 </SidebarMenuButton>
               </Link>
@@ -142,11 +152,15 @@ export default function AdminSidebar() {
          </div>
           <div className="grid grid-cols-2 gap-2">
             <Button onClick={handleLogout} variant="outline" className={cn("w-full justify-start", state === 'collapsed' && 'justify-center')}>
-                <LogOut className={cn("h-4 w-4", state === 'expanded' && 'mr-2')} />
+                <React.Suspense fallback={<IconLoadingSkeleton />}>
+                  <LogOut className={cn("h-4 w-4", state === 'expanded' && 'mr-2')} />
+                </React.Suspense>
                 <span className={cn(state === 'collapsed' && 'hidden')}>Logout</span>
             </Button>
             <Button onClick={handleClearCache} variant="outline" className={cn("w-full justify-start", state === 'collapsed' && 'justify-center')}>
-                <Zap className={cn("h-4 w-4", state === 'expanded' && 'mr-2')} />
+                <React.Suspense fallback={<IconLoadingSkeleton />}>
+                  <Zap className={cn("h-4 w-4", state === 'expanded' && 'mr-2')} />
+                </React.Suspense>
                 <span className={cn(state === 'collapsed' && 'hidden')}>Clear Cache</span>
             </Button>
           </div>

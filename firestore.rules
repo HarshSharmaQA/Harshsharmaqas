@@ -3,9 +3,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     function isAdmin() {
-      // An admin can be the hardcoded email, a user with the 'admin' role, or the hardcoded UID.
       return request.auth.token.email == 'harshsharmaqa@gmail.com' ||
-             request.auth.uid == '7YCygdl3aITdlmgRHqBrZCzuWcj1' ||
              (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
               get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
     }
@@ -35,6 +33,7 @@ service cloud.firestore {
         allow write: if isAdmin();
     }
     
+    // NEW: Allow public read on pages, but only admins can write
     match /pages/{document=**} {
       allow read: if true;
       allow write: if isAdmin();

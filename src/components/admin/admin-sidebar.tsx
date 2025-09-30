@@ -11,7 +11,11 @@ import {
   Users,
   Settings,
   PanelLeft,
+  Newspaper,
+  LogOut,
 } from 'lucide-react';
+import { getAuth, signOut } from 'firebase/auth';
+import { useAuthState } from 'react-firebase-hooks/auth';
 import {
   Sidebar,
   SidebarHeader,
@@ -25,9 +29,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { app } from '@/lib/firebase';
 
 const menuItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin/blogs', label: 'Blogs', icon: Newspaper },
   { href: '/admin/content', label: 'Content', icon: FileText },
   { href: '/admin/seo', label: 'SEO', icon: TrendingUp },
   { href: '/admin/courses', label: 'Courses', icon: BookOpen },
@@ -38,6 +44,12 @@ const menuItems = [
 export default function AdminSidebar() {
   const pathname = usePathname();
   const { toggleSidebar, state } = useSidebar();
+  const auth = getAuth(app);
+  const [user] = useAuthState(auth);
+
+  const handleLogout = () => {
+    signOut(auth);
+  };
   
   return (
     <Sidebar>
@@ -67,17 +79,21 @@ export default function AdminSidebar() {
           ))}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter className="border-t">
+      <SidebarFooter className="border-t flex flex-col gap-2">
          <div className="flex items-center gap-3 p-2">
             <Avatar>
-                <AvatarImage src="https://picsum.photos/seed/admin/100/100" data-ai-hint="person portrait" />
-                <AvatarFallback>A</AvatarFallback>
+                <AvatarImage src={user?.photoURL || "https://picsum.photos/seed/admin/100/100"} data-ai-hint="person portrait" />
+                <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
-            <div className={cn(state === 'collapsed' && 'hidden')}>
-                <p className="font-semibold">Admin User</p>
-                <p className="text-xs text-muted-foreground">admin@qaranker.com</p>
+            <div className={cn("flex-grow", state === 'collapsed' && 'hidden')}>
+                <p className="font-semibold truncate">{user?.displayName || 'Admin User'}</p>
+                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
             </div>
          </div>
+          <Button onClick={handleLogout} variant="ghost" className={cn("w-full justify-start", state === 'collapsed' && 'justify-center')}>
+            <LogOut className="h-4 w-4 mr-2" />
+            <span className={cn(state === 'collapsed' && 'hidden')}>Logout</span>
+          </Button>
       </SidebarFooter>
     </Sidebar>
   );

@@ -1,8 +1,32 @@
+'use client';
+
 import type { ReactNode } from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { getAuth } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
+import { app } from '@/lib/firebase';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import AdminSidebar from '@/components/admin/admin-sidebar';
+import { Loader2 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
+  const auth = getAuth(app);
+  const [user, loading] = useAuthState(auth);
+  const router = useRouter();
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    router.replace('/login');
+    return null;
+  }
+  
   return (
     <SidebarProvider>
       <AdminSidebar />

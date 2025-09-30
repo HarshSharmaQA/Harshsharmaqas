@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -16,6 +18,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Bot } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
+import { app } from '@/lib/firebase';
 
 const signupSchema = z.object({
   name: z.string().min(1, 'Name is required.'),
@@ -26,13 +30,28 @@ const signupSchema = z.object({
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 export default function SignupPage() {
-  const { register, handleSubmit, formState: { errors } } = useForm<SignupFormValues>({
+  const router = useRouter();
+  const { toast } = useToast();
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
   });
 
-  const onSubmit = (data: SignupFormValues) => {
-    console.log(data);
-    // Here you would typically handle user registration
+  const onSubmit = async (data: SignupFormValues) => {
+    const auth = getAuth(app);
+    try {
+      await createUserWithEmailAndPassword(auth, data.email, data.password);
+      toast({
+        title: "Account Created",
+        description: "You can now log in.",
+      });
+      router.push('/login');
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Signup Failed",
+        description: error.message,
+      });
+    }
   };
 
   return (
@@ -63,7 +82,9 @@ export default function SignupPage() {
               <Input id="password" type="password" {...register('password')} />
               {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
             </div>
-            <Button type="submit" className="w-full">Create Account</Button>
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? 'Creating Account...' : 'Create Account'}
+            </Button>
           </form>
         </CardContent>
         <CardFooter>

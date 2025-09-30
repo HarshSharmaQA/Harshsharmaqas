@@ -17,11 +17,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ImageUploader } from '@/components/admin/image-uploader';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const blogSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
@@ -94,117 +95,167 @@ export default function CreateBlogPage() {
       .slice(0, 50);
     form.setValue('slug', slug);
   };
+  
+  const generateSeoTitle = () => {
+    const title = form.getValues('title');
+    form.setValue('seoTitle', title);
+  };
+  
+  const title = form.watch('title');
+  const content = form.watch('content');
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold font-headline">Create Blog Post</h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>New Blog Post</CardTitle>
-          <CardDescription>Fill out the form to create a new blog post.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Your amazing blog post title" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold font-headline">Create Blog Post</h1>
+        <Button onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting || loading}>
+          {(isSubmitting || loading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {isSubmitting ? 'Publishing...' : 'Publish Post'}
+        </Button>
+      </div>
 
-              <FormField
-                control={form.control}
-                name="slug"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL Slug</FormLabel>
-                    <div className="flex items-center gap-2">
+      <Form {...form}>
+        <form className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Content</CardTitle>
+                <CardDescription>Write the main content of your blog post here.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Title</FormLabel>
                       <FormControl>
-                        <Input placeholder="your-amazing-blog-post-title" {...field} />
+                        <Input placeholder="Your amazing blog post title" {...field} />
                       </FormControl>
-                      <Button type="button" variant="outline" onClick={generateSlug}>Generate</Button>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="content"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Content</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Write your blog post here. Use markdown for formatting." {...field} rows={20} />
+                      </FormControl>
+                      <FormDescription>
+                        Supports markdown for rich text editing. Character count: {content.length}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+          </div>
 
-              <FormField
-                control={form.control}
-                name="featureImageUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Feature Image</FormLabel>
-                    <FormControl>
-                      <ImageUploader 
-                        onUrlChange={(url) => form.setValue('featureImageUrl', url)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="content"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Content</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Write your blog post here..." {...field} rows={15} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <h2 className="text-2xl font-bold font-headline border-t pt-6">SEO Settings</h2>
-
-              <FormField
-                control={form.control}
-                name="seoTitle"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>SEO Title</FormLabel>
-                    <FormControl>
-                      <Input placeholder="A catchy title for search engines" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="seoDescription"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>SEO Description</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="A concise and compelling description for search engine result pages." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <Button type="submit" disabled={isSubmitting || loading}>
-                {(isSubmitting || loading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isSubmitting ? 'Publishing...' : 'Publish Post'}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+          {/* Sidebar */}
+          <div className="space-y-6">
+            <Tabs defaultValue="seo" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="seo">SEO</TabsTrigger>
+                <TabsTrigger value="settings">Settings</TabsTrigger>
+              </TabsList>
+              <TabsContent value="seo">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>SEO Settings</CardTitle>
+                    <CardDescription>Optimize your post for search engines.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                     <FormField
+                      control={form.control}
+                      name="seoTitle"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>SEO Title</FormLabel>
+                           <div className="flex items-center gap-2">
+                            <FormControl>
+                              <Input placeholder="A catchy title for search engines" {...field} />
+                            </FormControl>
+                            <Button type="button" variant="outline" size="sm" onClick={generateSeoTitle}>Copy Title</Button>
+                          </div>
+                          <FormDescription>
+                            The title that will appear in search engine results. Length: {field.value.length} / 60
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="seoDescription"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>SEO Description (Meta)</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="A concise and compelling description for search engine result pages." {...field} rows={4} />
+                          </FormControl>
+                           <FormDescription>
+                            A short summary for search results. Length: {field.value.length} / 160
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="settings">
+                 <Card>
+                    <CardHeader>
+                        <CardTitle>Post Settings</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <FormField
+                        control={form.control}
+                        name="slug"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>URL Slug</FormLabel>
+                            <div className="flex items-center gap-2">
+                                <FormControl>
+                                <Input placeholder="your-amazing-blog-post-title" {...field} />
+                                </FormControl>
+                                <Button type="button" variant="outline" size="sm" onClick={generateSlug}>Generate</Button>
+                            </div>
+                            <FormDescription>
+                                The unique URL path for this post.
+                            </FormDescription>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <FormField
+                        control={form.control}
+                        name="featureImageUrl"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Feature Image</FormLabel>
+                            <FormControl>
+                                <ImageUploader 
+                                onUrlChange={(url) => form.setValue('featureImageUrl', url)}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                    </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </form>
+      </Form>
     </div>
   );
 }

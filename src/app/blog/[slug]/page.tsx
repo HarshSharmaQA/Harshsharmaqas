@@ -73,7 +73,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
           url: post.featureImageUrl || PlaceHolderImages.find(img => img.id === 'course-detail-banner')?.imageUrl || '',
           width: 1200,
           height: 630,
-          alt: post.title,
+          alt: post.altText || post.title,
         },
       ],
     },
@@ -125,7 +125,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
       <section className="relative h-64 md:h-96 w-full">
           <Image
               src={imageUrl}
-              alt={post.title}
+              alt={post.altText || post.title}
               fill
               className="object-cover"
               data-ai-hint="blog post image"
@@ -176,7 +176,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
                                   <Link href={`/blog/${relatedPost.slug}`} className="block overflow-hidden rounded-t-lg">
                                   <Image
                                       src={relatedImageUrl}
-                                      alt={relatedPost.title}
+                                      alt={relatedPost.altText || relatedPost.title}
                                       width={400}
                                       height={250}
                                       className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-105"
@@ -209,5 +209,3 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
     </div>
   );
 }
-
-    

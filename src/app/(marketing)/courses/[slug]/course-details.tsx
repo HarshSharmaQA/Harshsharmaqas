@@ -39,11 +39,8 @@ export function CourseDetails({ course }: { course: Course }) {
   const syllabusToShow = isEnrolled ? course.syllabus : course.syllabus.slice(0, 2);
 
   if (!isClient) {
-    return (
-        <div className="flex justify-center items-center h-screen">
-            Loading course...
-        </div>
-    );
+    // Render nothing on the server to avoid hydration mismatch
+    return null;
   }
 
   return (
@@ -59,7 +56,7 @@ export function CourseDetails({ course }: { course: Course }) {
       <section className="relative h-64 md:h-80 w-full">
         <Image
             src={course.imageUrl || bannerImage?.imageUrl || "https://picsum.photos/seed/banner/1200/400"}
-            alt={course.title}
+            alt={course.altText || course.title}
             fill
             className="object-cover"
             data-ai-hint={bannerImage?.imageHint || 'course banner'}
@@ -111,7 +108,7 @@ export function CourseDetails({ course }: { course: Course }) {
                 <CardHeader className="p-0">
                     <Image 
                         src={course.imageUrl || bannerImage?.imageUrl || "https://picsum.photos/seed/card/400/250"}
-                        alt={course.title}
+                        alt={course.altText || course.title}
                         width={400}
                         height={250}
                         className="w-full h-52 object-cover rounded-t-lg"
@@ -153,7 +150,7 @@ export function CourseDetails({ course }: { course: Course }) {
                     <div className="flex items-center gap-4">
                         {instructorImage && (
                             <Avatar className="h-20 w-20">
-                                <AvatarImage src={instructorImage.imageUrl} alt={course.instructor} data-ai-hint={instructorImage.imageHint} />
+                                <AvatarImage src={instructorImage.imageUrl} alt={course.instructor} />
                                 <AvatarFallback>{course.instructor.charAt(0)}</AvatarFallback>
                             </Avatar>
                         )}

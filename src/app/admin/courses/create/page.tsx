@@ -37,6 +37,7 @@ const courseSchema = z.object({
   duration: z.string().min(1, 'Duration is required.'),
   level: z.enum(['Beginner', 'Intermediate', 'Advanced']),
   imageUrl: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
+  altText: z.string().optional(),
   syllabus: z.array(syllabusSchema).min(1, 'At least one syllabus item is required.'),
 });
 
@@ -57,6 +58,7 @@ export default function CreateCoursePage() {
       duration: '',
       level: 'Beginner',
       imageUrl: '',
+      altText: '',
       syllabus: [{ title: '', content: '' }],
     },
   });
@@ -303,6 +305,22 @@ export default function CreateCoursePage() {
                             initialUrl={imageUrl}
                           />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="altText"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Image Alt Text</FormLabel>
+                        <FormControl>
+                          <Input placeholder="A descriptive caption for the image" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          For accessibility and SEO.
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}

@@ -45,7 +45,7 @@ export default async function CoursesPage() {
                 <div className="overflow-hidden">
                     <Image
                       src={imageUrl}
-                      alt={course.title}
+                      alt={course.altText || course.title}
                       width={400}
                       height={250}
                       className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-105"

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -51,6 +52,7 @@ export type BlogPost = {
   category: string;
   seoDescription: string;
   featureImageUrl?: string;
+  altText?: string;
   createdAt: Timestamp;
   faqs?: { question: string; answer: string }[];
 };

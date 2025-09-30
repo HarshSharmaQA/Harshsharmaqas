@@ -1,3 +1,4 @@
+
 export type Course = {
   id: string;
   slug: string;
@@ -8,6 +9,7 @@ export type Course = {
   duration: string;
   level: 'Beginner' | 'Intermediate' | 'Advanced';
   imageUrl?: string;
+  altText?: string;
   imageId?: string; // Keep for backward compatibility with seeded data if necessary
   syllabus: { title: string; content: string }[];
 };
@@ -23,6 +25,7 @@ export const courses: Course[] = [
     duration: '6 Weeks',
     level: 'Beginner',
     imageId: 'course-1-thumb',
+    altText: 'A person writing on a checklist on a clipboard.',
     syllabus: [
       { title: 'Week 1: Introduction to Software Testing', content: 'Understanding the SDLC, STLC, and the role of a QA tester.' },
       { title: 'Week 2: Test Planning and Documentation', content: 'Creating test plans, test scenarios, and test cases.' },
@@ -40,6 +43,7 @@ export const courses: Course[] = [
     duration: '8 Weeks',
     level: 'Intermediate',
     imageId: 'course-2-thumb',
+    altText: 'A robot arm typing on a laptop keyboard.',
     syllabus: [
       { title: 'Week 1-2: Java for Testers', content: 'Core Java concepts necessary for automation.' },
       { title: 'Week 3-4: Selenium WebDriver Basics', content: 'Locators, element interaction, and browser handling.' },
@@ -57,6 +61,7 @@ export const courses: Course[] = [
     duration: '4 Weeks',
     level: 'Intermediate',
     imageId: 'course-3-thumb',
+    altText: 'A diagram showing an API connecting to a database.',
     syllabus: [
         { title: 'Week 1: Understanding APIs', content: 'HTTP methods, status codes, and API architecture.' },
         { title: 'Week 2: Postman Fundamentals', content: 'Collections, requests, variables, and environments.' },
@@ -74,6 +79,7 @@ export const courses: Course[] = [
     duration: '5 Weeks',
     level: 'Advanced',
     imageId: 'course-4-thumb',
+    altText: 'A speedometer chart showing performance metrics.',
     syllabus: [
         { title: 'Week 1: Intro to Performance Testing', content: 'Types of performance tests, metrics, and goals.' },
         { title: 'Week 2: JMeter Deep Dive', content: 'Test plan elements, thread groups, samplers, and listeners.' },

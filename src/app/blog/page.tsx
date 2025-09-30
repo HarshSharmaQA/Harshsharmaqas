@@ -15,6 +15,7 @@ type BlogPost = {
   slug: string;
   seoDescription: string;
   featureImageUrl?: string;
+  altText?: string;
   createdAt: Timestamp;
 };
 
@@ -51,7 +52,7 @@ export default async function BlogPage() {
                 <Link href={`/blog/${post.slug}`}>
                   <Image
                     src={imageUrl}
-                    alt={post.title}
+                    alt={post.altText || post.title}
                     width={400}
                     height={250}
                     className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-105"

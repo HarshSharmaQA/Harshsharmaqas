@@ -36,6 +36,7 @@ const blogSchema = z.object({
   category: z.string().min(3, 'Category must be at least 3 characters.'),
   content: z.string().min(100, 'Content must be at least 100 characters.'),
   featureImageUrl: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
+  altText: z.string().optional(),
   seoTitle: z.string().min(5, 'SEO title must be at least 5 characters.'),
   seoDescription: z.string().min(10, 'SEO description must be at least 10 characters.'),
   faqs: z.array(faqSchema).optional(),
@@ -57,6 +58,7 @@ export default function CreateBlogPage() {
       category: '',
       content: '',
       featureImageUrl: '',
+      altText: '',
       seoTitle: '',
       seoDescription: '',
       faqs: [],
@@ -345,6 +347,22 @@ export default function CreateBlogPage() {
                             </FormItem>
                         )}
                         />
+                        <FormField
+                            control={form.control}
+                            name="altText"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Image Alt Text</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="A descriptive caption for the image" {...field} />
+                                </FormControl>
+                                <FormDescription>
+                                    For accessibility and SEO.
+                                </FormDescription>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </CardContent>
                 </Card>
               </TabsContent>
@@ -355,5 +373,3 @@ export default function CreateBlogPage() {
     </div>
   );
 }
-
-    

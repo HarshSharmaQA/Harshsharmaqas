@@ -29,7 +29,7 @@ import { Button } from '../ui/button';
 import { format } from 'date-fns';
 import { type BlogPost } from '@/app/admin/blogs/page';
 import { useEffect, useState } from 'react';
-import { type DashboardData } from '@/lib/data';
+import { getDashboardData, type DashboardData } from '@/lib/data';
 import { Skeleton } from '../ui/skeleton';
 
 interface DashboardClientProps {
@@ -45,6 +45,10 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
       // This part is for safety, in case server-side fetch fails,
       // but with the new structure it should not be needed in normal operation.
       setLoading(true);
+      getDashboardData().then((fetchedData) => {
+        setData(fetchedData);
+        setLoading(false);
+      });
     } else {
       setData(initialData);
       setLoading(false);

@@ -1,52 +1,52 @@
 rules_version = '2';
 
+// The admin UID. All admin actions will be checked against this UID.
+function getAdminUid() {
+  // This is the UID for the user harshsharmaqa@gmail.com
+  return "7YCygdl3aITdlmgRHqBrZCzuWcj1";
+}
+
+function isAuthenticated() {
+  return request.auth != null;
+}
+
+function isOwner(userId) {
+  return isAuthenticated() && request.auth.uid == userId;
+}
+
+function isAdmin() {
+  return isAuthenticated() && request.auth.uid == getAdminUid();
+}
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    function isAdmin() {
-      return request.auth != null && request.auth.email == 'harshsharmaqa@gmail.com';
+
+    // Admins can list and read any user. Users can only read/write their own document.
+    match /users/{userId} {
+      allow list, read: if isAdmin();
+      allow create: if isAuthenticated(); 
+      // User can update their own info, but cannot change their role. Admin can update anything.
+      allow update: if (isOwner(userId) && !('role' in request.resource.data)) || isAdmin();
+      allow delete: if isAdmin();
     }
 
-    function isUser(userId) {
-      return request.auth != null && request.auth.uid == userId;
-    }
-
-    match /users/{uid} {
-      allow list: if isAdmin(); // Allow admin to list users for the dashboard
-      allow read: if isUser(uid) || isAdmin();
-      allow create;
-      allow write: if isUser(uid) || isAdmin();
-    }
-    
+    // Blogs can be read by anyone. Only admins can write.
     match /blogs/{blogId} {
-      allow read;
+      allow read: if true;
       allow write: if isAdmin();
-      
+
+      // Any authenticated user can like/unlike a post.
       match /likes/{userId} {
-        allow read;
-        allow create, delete: if isUser(userId);
+        allow create, delete: if isOwner(userId);
+        // Disallow reading the list of likes directly.
+        allow read, list, update: if false; 
       }
     }
-    
-    match /courses/{courseId} {
-      allow read;
-      allow list: if isAdmin(); // Allow admin to list courses for the dashboard
-      allow write: if isAdmin();
-    }
-    
-    match /testimonials/{testimonialId} {
-        allow read;
-        allow write: if isAdmin();
-    }
-    
-    match /pages/{pageId} {
-        allow read;
-        allow write: if isAdmin();
-    }
 
-    match /settings/site {
-      allow read;
-      allow write: if isAdmin();
-    }
+    // Public collections are readable by anyone, writable only by admins.
+    match /courses/{docId} { allow read: if true; allow write: if isAdmin(); }
+    match /pages/{docId} { allow read: if true; allow write: if isAdmin(); }
+    match /testimonials/{docId} { allow read: if true; allow write: if isAdmin(); }
+    match /settings/{docId} { allow read: if true; allow write: if isAdmin(); }
   }
 }

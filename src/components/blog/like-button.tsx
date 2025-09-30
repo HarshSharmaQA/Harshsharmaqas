@@ -1,9 +1,9 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect }bigcrunker
 import { db, app } from '@/lib/firebase';
-import { collection, doc, onSnapshot, writeBatch, getDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
+import { collection, doc, writeBatch, getDoc, serverTimestamp, deleteDoc, getCountFromServer } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { Button } from '@/components/ui/button';
@@ -24,23 +24,33 @@ export function LikeButton({ postId }: LikeButtonProps) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Listen for changes to the like count
-    const unsubscribeLikes = onSnapshot(collection(db, 'blogs', postId, 'likes'), snapshot => {
-      setLikes(snapshot.size);
-      // We only check if the user has liked it after the auth state is confirmed
-      if (!authLoading) {
+    const getLikes = async () => {
+      setLoading(true);
+      try {
+        // Get total like count
+        const likesCol = collection(db, 'blogs', postId, 'likes');
+        const snapshot = await getCountFromServer(likesCol);
+        setLikes(snapshot.data().count);
+
+        // Check if current user has liked it
         if (user) {
-          const liked = snapshot.docs.some(doc => doc.id === user.uid);
-          setIsLiked(liked);
+          const likeDocRef = doc(db, 'blogs', postId, 'likes', user.uid);
+          const likeDoc = await getDoc(likeDocRef);
+          setIsLiked(likeDoc.exists());
         } else {
-          // Not logged in, so can't have liked it.
           setIsLiked(false);
         }
-         setLoading(false);
+      } catch (error) {
+        console.error("Error fetching likes:", error);
+        // Don't show toast for reads, only writes
+      } finally {
+        setLoading(false);
       }
-    });
+    };
 
-    return () => unsubscribeLikes();
+    if (!authLoading) {
+      getLikes();
+    }
   }, [postId, user, authLoading]);
 
   const handleLike = async () => {
@@ -57,30 +67,37 @@ export function LikeButton({ postId }: LikeButtonProps) {
     const postRef = doc(db, 'blogs', postId);
     const likeRef = doc(postRef, 'likes', user.uid);
     
+    // Optimistic UI update
+    const wasLiked = isLiked;
+    setIsLiked(!wasLiked);
+    setLikes(prev => wasLiked ? prev - 1 : prev + 1);
+
     try {
         const likeDoc = await getDoc(likeRef);
-        const batch = writeBatch(db);
         
         if (likeDoc.exists()) {
-            // User has already liked, so unlike
-            batch.delete(likeRef);
+            await deleteDoc(likeRef);
         } else {
-            // User has not liked, so like
-            batch.set(likeRef, { createdAt: serverTimestamp() });
+            await setDoc(likeRef, { createdAt: serverTimestamp() });
         }
+        
+        // Fetch the true count from server to ensure consistency
+        const likesCol = collection(db, 'blogs', postId, 'likes');
+        const snapshot = await getCountFromServer(likesCol);
+        setLikes(snapshot.data().count);
 
-        await batch.commit();
-        // The onSnapshot listener will update the state, so we don't need to manually set it here.
     } catch (error) {
        console.error("Error updating like: ", error);
+       // Revert optimistic update on error
+       setIsLiked(wasLiked);
+       setLikes(prev => wasLiked ? prev + 1 : prev -1);
        toast({
         variant: 'destructive',
         title: 'Error',
         description: 'There was a problem processing your request.',
       });
     } finally {
-        // Let the snapshot listener handle setting loading to false
-        // to avoid a flash of incorrect state.
+        setLoading(false);
     }
   };
 

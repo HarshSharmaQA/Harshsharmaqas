@@ -29,26 +29,27 @@ import { Button } from '../ui/button';
 import { format } from 'date-fns';
 import { type BlogPost } from '@/app/admin/blogs/page';
 import { useEffect, useState } from 'react';
-import { getDashboardData, type DashboardData } from '@/lib/data';
+import { type DashboardData } from '@/lib/data';
 import { Skeleton } from '../ui/skeleton';
 
-export function DashboardClient() {
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
+interface DashboardClientProps {
+  initialData: DashboardData | null;
+}
+
+export function DashboardClient({ initialData }: DashboardClientProps) {
+  const [data, setData] = useState<DashboardData | null>(initialData);
+  const [loading, setLoading] = useState(!initialData);
 
   useEffect(() => {
-    async function fetchData() {
-        try {
-          const dashboardData = await getDashboardData();
-          setData(dashboardData);
-        } catch (error) {
-          console.error("Failed to fetch dashboard data:", error);
-        } finally {
-          setLoading(false);
-        }
+    if (!initialData) {
+      // This part is for safety, in case server-side fetch fails,
+      // but with the new structure it should not be needed in normal operation.
+      setLoading(true);
+    } else {
+      setData(initialData);
+      setLoading(false);
     }
-    fetchData();
-  }, []);
+  }, [initialData]);
 
   const stats = [
     {
@@ -109,8 +110,8 @@ export function DashboardClient() {
                 </Card>
             ))
         ) : (
-            stats.map((stat) => (
-            <Card key={stat.title}>
+            stats.map((stat, index) => (
+            <Card key={index}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
                 {stat.icon}

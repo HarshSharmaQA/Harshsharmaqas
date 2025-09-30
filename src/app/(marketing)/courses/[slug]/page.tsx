@@ -1,8 +1,7 @@
 
+'use client';
+
 import Image from 'next/image';
-import { notFound } from 'next/navigation';
-import { collection, query, where, getDocs, limit } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import { type Course } from '@/lib/mock-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import {
@@ -15,8 +14,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Clock, BarChart2, DollarSign, User } from 'lucide-react';
-import type { Metadata } from 'next';
+import { Clock, BarChart2, User, CheckCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { collection, query, where, getDocs, limit } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { notFound } from 'next/navigation';
+import { EnrollDialog } from '@/components/courses/enroll-dialog';
 
 async function getCourse(slug: string): Promise<Course | null> {
   const q = query(collection(db, 'courses'), where('slug', '==', slug), limit(1));
@@ -30,22 +33,35 @@ async function getCourse(slug: string): Promise<Course | null> {
   return courseDoc.data() as Course;
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const course = await getCourse(params.slug);
-  if (!course) {
-    return {
-      title: 'Course Not Found',
-    };
-  }
-  return {
-    title: course.title,
-    description: course.description,
+export default function CourseDetailPage({ params }: { params: { slug: string } }) {
+  const [course, setCourse] = useState<Course | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  useEffect(() => {
+    async function fetchCourse() {
+      try {
+        const courseData = await getCourse(params.slug);
+        setCourse(courseData);
+      } catch (error) {
+        console.error("Failed to fetch course", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCourse();
+  }, [params.slug]);
+
+  const handleEnrollmentSuccess = () => {
+    setIsEnrolled(true);
+    setIsDialogOpen(false);
   };
-}
-
-
-export default async function CourseDetailPage({ params }: { params: { slug: string } }) {
-  const course = await getCourse(params.slug);
+  
+  if (loading) {
+    // You can replace this with a proper skeleton loader component
+    return <div className="flex justify-center items-center h-screen">Loading course...</div>;
+  }
 
   if (!course) {
     notFound();
@@ -54,8 +70,16 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
   const bannerImage = PlaceHolderImages.find((img) => img.id === 'course-detail-banner');
   const instructorImage = PlaceHolderImages.find((img) => img.id === 'instructor-avatar');
   
+  const syllabusToShow = isEnrolled ? course.syllabus.slice(0, 3) : course.syllabus.slice(0, 2);
+
   return (
     <div className="bg-background">
+       <EnrollDialog 
+        isOpen={isDialogOpen} 
+        onOpenChange={setIsDialogOpen} 
+        onEnrollmentSuccess={handleEnrollmentSuccess}
+        courseTitle={course.title}
+       />
       {/* Hero Banner */}
       <section className="relative h-64 md:h-80 w-full">
         <Image
@@ -84,7 +108,7 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
                 </CardHeader>
                 <CardContent>
                     <Accordion type="single" collapsible className="w-full">
-                    {course.syllabus.map((item, index) => (
+                    {syllabusToShow.map((item, index) => (
                         <AccordionItem key={index} value={`item-${index}`}>
                         <AccordionTrigger className="font-semibold text-lg hover:no-underline">
                             {item.title}
@@ -95,6 +119,13 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
                         </AccordionItem>
                     ))}
                     </Accordion>
+                    {!isEnrolled && course.syllabus.length > 2 && (
+                       <div className="mt-8 text-center p-6 border-2 border-dashed rounded-lg bg-muted/50">
+                            <h3 className="text-xl font-bold font-headline">Unlock the Full Course</h3>
+                            <p className="text-muted-foreground mt-2 mb-4">Enroll now to get access to all {course.syllabus.length} modules, including hands-on projects and quizzes.</p>
+                            <Button onClick={() => setIsDialogOpen(true)}>Enroll Now to Continue</Button>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
           </div>
@@ -115,7 +146,16 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
                 
                 <div className="flex justify-between items-center mb-4">
                     <p className="text-3xl font-bold text-primary">${course.price}</p>
-                    <Button className="w-1/2 text-lg" size="lg">Enroll Now</Button>
+                    {isEnrolled ? (
+                      <Button className="w-1/2 text-lg" size="lg" disabled>
+                        <CheckCircle className="mr-2" />
+                        Enrolled
+                      </Button>
+                    ) : (
+                      <Button className="w-1/2 text-lg" size="lg" onClick={() => setIsDialogOpen(true)}>
+                        Enroll Now
+                      </Button>
+                    )}
                 </div>
                 
                 <ul className="mt-6 space-y-4 text-sm border-t pt-6">

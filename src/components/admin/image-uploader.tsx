@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { app } from '@/lib/firebase';
 import { Input } from '@/components/ui/input';
@@ -23,6 +23,10 @@ export function ImageUploader({ onUrlChange, initialUrl }: ImageUploaderProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(initialUrl || null);
   const { toast } = useToast();
 
+  useEffect(() => {
+    setImageUrl(initialUrl || null);
+  }, [initialUrl]);
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -38,8 +42,7 @@ export function ImageUploader({ onUrlChange, initialUrl }: ImageUploaderProps) {
 
     setUploading(true);
     setProgress(0);
-    setImageUrl(null);
-
+    
     const storageRef = ref(storage, `blog-images/${Date.now()}-${file.name}`);
     const uploadTask = uploadBytesResumable(storageRef, file);
 

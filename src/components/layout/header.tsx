@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -20,6 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '../ui/skeleton';
 
 const navLinks = [
   { href: '/blog', label: 'Blog' },
@@ -36,6 +38,12 @@ export default function Header({ siteName }: { siteName: string }) {
   const auth = getAuth(app);
   const [user, loading] = useAuthState(auth);
   const isAdmin = user?.email === ADMIN_EMAIL;
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
 
   const handleLogout = () => {
     signOut(auth);
@@ -113,7 +121,9 @@ export default function Header({ siteName }: { siteName: string }) {
         
         {/* Auth & Social Links */}
         <div className="flex items-center justify-end ml-auto gap-2">
-          {!loading && user ? (
+          {!isClient || loading ? (
+             <Skeleton className="h-8 w-16" />
+          ) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">

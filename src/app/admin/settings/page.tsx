@@ -20,6 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Loader2 } from 'lucide-react';
 import { useEffect } from 'react';
+import { ImageUploader } from '@/components/admin/image-uploader';
 
 const settingsSchema = z.object({
   siteName: z.string().min(1, 'Site name is required.'),
@@ -27,6 +28,7 @@ const settingsSchema = z.object({
   heroTitle: z.string().min(1, 'Hero title is required.'),
   heroSubtitle: z.string().min(1, 'Hero subtitle is required.'),
   heroDescription: z.string().min(1, 'Hero description is required.'),
+  heroImageUrl: z.string().url().optional().or(z.literal('')),
   aboutMeLong: z.string().min(1, 'About me content is required.'),
   socialTwitter: z.string().url().optional().or(z.literal('')),
   socialLinkedin: z.string().url().optional().or(z.literal('')),
@@ -45,6 +47,7 @@ export default function AdminSettingsPage() {
       heroTitle: '',
       heroSubtitle: '',
       heroDescription: '',
+      heroImageUrl: '',
       aboutMeLong: '',
       socialTwitter: '',
       socialLinkedin: '',
@@ -81,6 +84,8 @@ export default function AdminSettingsPage() {
       });
     }
   };
+  
+  const heroImageUrl = form.watch('heroImageUrl');
 
   return (
     <div className="space-y-8">
@@ -164,6 +169,22 @@ export default function AdminSettingsPage() {
                                 <Textarea rows={3} placeholder="I write about testing, development, and career growth..." {...field} />
                             </FormControl>
                             <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="heroImageUrl"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Hero Image</FormLabel>
+                        <FormControl>
+                            <ImageUploader 
+                            onUrlChange={(url) => form.setValue('heroImageUrl', url, { shouldDirty: true })}
+                            initialUrl={heroImageUrl}
+                            />
+                        </FormControl>
+                        <FormMessage />
                         </FormItem>
                     )}
                 />

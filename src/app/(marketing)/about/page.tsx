@@ -8,6 +8,7 @@ import type { Metadata } from 'next';
 type SiteSettings = {
   aboutMeLong: string;
   siteName: string;
+  heroImageUrl?: string;
 };
 
 async function getSettings(): Promise<SiteSettings | null> {
@@ -33,7 +34,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function AboutPage() {
   const settings = await getSettings();
-  const aboutImage = PlaceHolderImages.find((img) => img.id === 'hero-image');
+  const heroImage = PlaceHolderImages.find((img) => img.id === 'hero-image');
+  const aboutImageUrl = settings?.heroImageUrl || heroImage?.imageUrl;
+  const aboutImageHint = heroImage?.imageHint || 'person smiling';
+
 
   return (
     <div className="container py-12 md:py-20">
@@ -65,14 +69,14 @@ export default async function AboutPage() {
           </div>
         </div>
         <div className="order-1 md:order-2 flex justify-center">
-          {aboutImage && (
+          {aboutImageUrl && (
             <Image
-              src={aboutImage.imageUrl}
+              src={aboutImageUrl}
               alt="Harsh Sharma"
               width={350}
               height={350}
               className="rounded-lg object-cover aspect-square shadow-2xl"
-              data-ai-hint={aboutImage.imageHint}
+              data-ai-hint={aboutImageHint}
             />
           )}
         </div>

@@ -27,6 +27,7 @@ type SiteSettings = {
   heroTitle: string;
   heroSubtitle: string;
   heroDescription: string;
+  heroImageUrl?: string;
   socialTwitter: string;
   socialLinkedin: string;
   socialGithub: string;
@@ -82,6 +83,8 @@ export default async function HomePage() {
 
   const fallbackImage = PlaceHolderImages.find(img => img.id === 'course-detail-banner');
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
+  const heroImageUrl = settings?.heroImageUrl || heroImage?.imageUrl;
+  const heroImageHint = heroImage?.imageHint || 'person smiling';
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -119,14 +122,14 @@ export default async function HomePage() {
               </div>
             </div>
              <div className="order-1 md:order-2 flex justify-center">
-              {heroImage && (
+              {heroImageUrl && (
                 <Image
-                  src={heroImage.imageUrl}
+                  src={heroImageUrl}
                   alt="Harsh Sharma"
                   width={350}
                   height={350}
                   className="rounded-full object-cover aspect-square shadow-2xl"
-                  data-ai-hint={heroImage.imageHint}
+                  data-ai-hint={heroImageHint}
                 />
               )}
             </div>

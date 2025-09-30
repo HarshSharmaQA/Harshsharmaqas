@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { useEffect } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { getAuth } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
@@ -14,17 +15,18 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const [user, loading] = useAuthState(auth);
   const router = useRouter();
 
-  if (loading) {
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/login');
+    }
+  }, [user, loading, router]);
+
+  if (loading || !user) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
-  }
-
-  if (!user) {
-    router.replace('/login');
-    return null;
   }
   
   return (

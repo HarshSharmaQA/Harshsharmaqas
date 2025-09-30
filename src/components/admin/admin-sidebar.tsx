@@ -128,7 +128,11 @@ export default function AdminSidebar() {
             </div>
          </div>
           <div className="grid grid-cols-1 gap-2">
-            <Button onClick={handleLogout} variant="outline" className={cn("w-full justify-start", state === 'collapsed' && 'justify-center')}>
+            <Button 
+                onClick={handleLogout} 
+                variant="default" 
+                className={cn("w-full justify-start bg-black text-white hover:bg-green-600", state === 'collapsed' && 'justify-center')}
+            >
                 <React.Suspense fallback={<IconLoadingSkeleton />}>
                   <LogOut className={cn("h-4 w-4", state === 'expanded' && 'mr-2')} />
                 </React.Suspense>

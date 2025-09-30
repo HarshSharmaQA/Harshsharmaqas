@@ -31,25 +31,6 @@ async function getPost(slug: string): Promise<BlogPost | null> {
   return postDoc.data() as BlogPost;
 }
 
-// NOTE: generateMetadata is a server-only function and cannot be used in a 'use client' component.
-// We can set the title dynamically on the client side if needed, or reconsider the component's architecture.
-/*
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const post = await getPost(params.slug);
-
-  if (!post) {
-    return {
-      title: 'Post Not Found',
-    }
-  }
-
-  return {
-    title: post.seoTitle,
-    description: post.seoDescription,
-  }
-}
-*/
-
 export default function BlogPostPage() {
   const params = useParams();
   const slug = params.slug as string;

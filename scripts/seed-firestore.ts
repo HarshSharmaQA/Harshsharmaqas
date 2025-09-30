@@ -1,3 +1,4 @@
+
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, writeBatch, getDocs, deleteDoc } from 'firebase/firestore';
 import { config } from 'dotenv';

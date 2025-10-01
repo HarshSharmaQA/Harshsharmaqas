@@ -23,7 +23,7 @@ export default async function CoursesPage() {
   const fallbackImage = PlaceHolderImages.find(img => img.id === 'course-detail-banner');
 
   return (
-    <div className="container py-12 md:py-20">
+    <div className="container py-12 md:py-20 px-4 md:px-6">
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-bold font-headline">Our Courses</h1>
         <p className="text-lg text-muted-foreground mt-2">Invest in your skills and grow your career with our expert-led courses.</p>

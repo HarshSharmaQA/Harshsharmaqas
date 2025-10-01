@@ -3,6 +3,7 @@
   "/admin/courses/page": "app/admin/courses/page.js",
   "/admin/courses/[slug]/edit/page": "app/admin/courses/[slug]/edit/page.js",
   "/admin/settings/page": "app/admin/settings/page.js",
-  "/(marketing)/page": "app/(marketing)/page.js",
-  "/admin/pages/page": "app/admin/pages/page.js"
+  "/admin/pages/page": "app/admin/pages/page.js",
+  "/admin/pages/[id]/edit/page": "app/admin/pages/[id]/edit/page.js",
+  "/(marketing)/page": "app/(marketing)/page.js"
 }

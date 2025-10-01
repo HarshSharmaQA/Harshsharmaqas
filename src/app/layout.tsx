@@ -1,4 +1,3 @@
-
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import type { Metadata } from 'next';

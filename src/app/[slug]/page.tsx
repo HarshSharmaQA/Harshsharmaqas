@@ -16,6 +16,18 @@ type Page = {
 };
 
 async function getPage(slug: string): Promise<Page | null> {
+  // Hardcoded content for the 'test' page as requested
+  if (slug === 'test') {
+    return {
+      id: 'test-page',
+      title: 'Test Page',
+      content: `<p>Of course. I understand that you want to refine the behavior of the sidebar toggle button. Your goal is to ensure that clicking the PanelLeft icon correctly collapses and expands the admin sidebar, showing only icons when collapsed.</p><p>Based on your request, I will adjust the AdminSidebar component to ensure the toggle functionality works as intended, cleanly switching between the expanded and collapsed states.</p><p>Here are the changes I'll make:</p>`,
+      createdAt: Timestamp.now(),
+      slug: 'test',
+      status: 'published',
+    };
+  }
+
   const q = query(collection(db, 'pages'), where('slug', '==', slug), limit(1));
   const querySnapshot = await getDocs(q);
   
@@ -57,11 +69,11 @@ export default async function CustomPage({ params }: { params: { slug: string } 
 
   return (
     <div className="container py-12 md:py-20">
-        <Card>
+        <Card className="max-w-4xl mx-auto">
             <CardContent className="p-6 md:p-10">
-                <h1 className="text-4xl md:text-5xl font-bold font-headline mb-8">{page.title}</h1>
+                <h1 className="text-4xl md:text-5xl font-bold font-headline mb-8 text-center">{page.title}</h1>
                 <div 
-                    className="prose prose-lg dark:prose-invert max-w-none"
+                    className="prose prose-lg dark:prose-invert max-w-none mx-auto"
                     dangerouslySetInnerHTML={{ __html: page.content }} 
                 />
             </CardContent>

@@ -50,11 +50,14 @@ export type BlogPost = {
   slug: string;
   author: string;
   category: string;
+  seoTitle: string;
   seoDescription: string;
+  metaKeywords?: string;
   featureImageUrl?: string;
   altText?: string;
   createdAt: Timestamp;
   faqs?: { question: string; answer: string }[];
+  content: string;
 };
 
 export default function AdminBlogsPage() {

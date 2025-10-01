@@ -55,8 +55,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const awaitedParams = await params;
-  const post = await getPost(awaitedParams.slug);
+  const post = await getPost(params.slug);
   if (!post) {
     return {
       title: 'Post Not Found',
@@ -65,6 +64,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   return {
     title: post.seoTitle,
     description: post.seoDescription,
+    keywords: post.metaKeywords,
     openGraph: {
       title: post.seoTitle,
       description: post.seoDescription,
@@ -80,36 +80,61 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-function FaqSchema({ post }: { post: BlogPost }) {
-  if (!post.faqs || post.faqs.length === 0) {
-    return null;
-  }
-
+function StructuredData({ post }: { post: BlogPost }) {
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    "mainEntity": post.faqs.map(faq => ({
+    "mainEntity": post.faqs?.map(faq => ({
       "@type": "Question",
       "name": faq.question,
       "acceptedAnswer": {
         "@type": "Answer",
         "text": faq.answer
       }
-    }))
+    })) || []
   };
 
+  const blogSchema = {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": post.seoTitle,
+      "name": post.title,
+      "description": post.seoDescription,
+      "image": post.featureImageUrl,
+      "author": {
+          "@type": "Person",
+          "name": post.author
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "QAWala",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://6000-firebase-studio-1759211472937.cluster-ancjwrkgr5dvux4qug5rbzyc2y.cloudworkstations.dev/icon.png"
+        }
+      },
+      "datePublished": post.createdAt ? post.createdAt.toDate().toISOString() : new Date().toISOString()
+  }
+
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-    />
+    <>
+      {post.faqs && post.faqs.length > 0 && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+          />
+      )}
+      <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(blogSchema) }}
+      />
+    </>
   );
 }
 
 
 export default async function BlogPostPage({ params }: { params: { slug: string } }) {
-  const awaitedParams = await params;
-  const post = await getPost(awaitedParams.slug);
+  const post = await getPost(params.slug);
 
   if (!post) {
     notFound();
@@ -121,7 +146,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
 
   return (
     <div>
-      <FaqSchema post={post} />
+      <StructuredData post={post} />
       <section className="relative h-64 md:h-96 w-full">
           <Image
               src={imageUrl}

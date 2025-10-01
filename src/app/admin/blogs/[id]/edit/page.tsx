@@ -38,6 +38,7 @@ const blogSchema = z.object({
   altText: z.string().optional(),
   seoTitle: z.string().min(5, 'SEO title must be at least 5 characters.'),
   seoDescription: z.string().min(10, 'SEO description must be at least 10 characters.'),
+  metaKeywords: z.string().optional(),
   faqs: z.array(faqSchema).optional(),
 });
 
@@ -60,6 +61,7 @@ export default function EditBlogPage() {
       altText: '',
       seoTitle: '',
       seoDescription: '',
+      metaKeywords: '',
       faqs: [],
     },
   });
@@ -297,6 +299,22 @@ export default function EditBlogPage() {
                         </FormItem>
                       )}
                     />
+                    <FormField
+                      control={form.control}
+                      name="metaKeywords"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Meta Keywords</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g. qa, testing, automation" {...field} />
+                          </FormControl>
+                           <FormDescription>
+                            Comma-separated keywords for SEO.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -344,7 +362,7 @@ export default function EditBlogPage() {
                       name="featureImageUrl"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Feature Image</FormLabel>
+                          <FormLabel>Banner Image</FormLabel>
                           <FormControl>
                             <ImageUploader 
                               onUrlChange={(url) => form.setValue('featureImageUrl', url, { shouldDirty: true })}

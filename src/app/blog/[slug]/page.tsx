@@ -22,6 +22,10 @@ import {
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
+type BlogPostPageProps = {
+  params: Promise<{ slug: string }>;
+};
+
 async function getPost(slug: string): Promise<BlogPost | null> {
   const q = query(collection(db, 'blogs'), where('slug', '==', slug), limit(1));
   const querySnapshot = await getDocs(q);
@@ -130,8 +134,9 @@ export async function generateStaticParams() {
   }));
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const post = await getPost(params.slug);
+export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPost(slug);
   if (!post) {
     return {
       title: 'Post Not Found',
@@ -209,8 +214,9 @@ function StructuredData({ post }: { post: BlogPost }) {
 }
 
 
-export default async function BlogPostPage({ params }: { params: { slug: string } }) {
-  const post = await getPost(params.slug);
+export default async function BlogPostPage({ params }: BlogPostPageProps) {
+  const { slug } = await params;
+  const post = await getPost(slug);
 
   if (!post) {
     notFound();

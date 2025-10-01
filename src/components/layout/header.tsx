@@ -51,7 +51,7 @@ export default function Header({ siteName }: { siteName: string }) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
+      <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Mobile Menu Trigger */}
         <div className="md:hidden">
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
@@ -88,7 +88,7 @@ export default function Header({ siteName }: { siteName: string }) {
         </div>
 
         {/* Desktop Logo */}
-        <div className="mr-auto hidden md:flex">
+        <div className="hidden md:flex">
           <Link href="/" className="flex items-center gap-2">
             <Bot className="h-6 w-6 text-primary" />
             <span className="font-bold font-headline text-lg">{siteName}</span>
@@ -96,7 +96,7 @@ export default function Header({ siteName }: { siteName: string }) {
         </div>
         
         {/* Mobile Logo (center) */}
-        <div className="flex-1 flex justify-center md:hidden">
+        <div className="flex justify-center md:hidden">
             <Link href="/" className="flex items-center gap-2">
                 <Bot className="h-6 w-6 text-primary" />
                 <span className="font-bold font-headline text-lg">{siteName}</span>
@@ -104,7 +104,7 @@ export default function Header({ siteName }: { siteName: string }) {
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex gap-6 items-center">
+        <nav className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 gap-6 items-center">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -120,7 +120,7 @@ export default function Header({ siteName }: { siteName: string }) {
         </nav>
         
         {/* Auth & Social Links */}
-        <div className="flex items-center justify-end ml-auto gap-2">
+        <div className="flex items-center justify-end gap-2">
           {!isClient || loading ? (
              <Skeleton className="h-8 w-16" />
           ) : user ? (

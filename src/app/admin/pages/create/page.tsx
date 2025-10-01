@@ -28,6 +28,10 @@ const pageSchema = z.object({
   content: z.string().min(10, 'Content must be at least 10 characters.'),
   status: z.enum(['draft', 'published']).default('draft'),
   password: z.string().optional(),
+  seoDescription: z.string().max(160, 'Description should not exceed 160 characters.').optional(),
+  metaKeywords: z.string().optional(),
+  author: z.string().optional(),
+  publisher: z.string().optional(),
 });
 
 type PageFormValues = z.infer<typeof pageSchema>;
@@ -44,6 +48,10 @@ export default function CreatePage() {
       content: '',
       status: 'draft',
       password: '',
+      seoDescription: '',
+      metaKeywords: '',
+      author: '',
+      publisher: '',
     },
   });
 
@@ -128,6 +136,76 @@ export default function CreatePage() {
                   />
               </CardContent>
               </Card>
+              <Card>
+                  <CardHeader>
+                    <CardTitle>SEO & Metadata</CardTitle>
+                    <CardDescription>Optimize this page for search engines.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                     <FormField
+                      control={form.control}
+                      name="seoDescription"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>SEO Description</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="A short and compelling description for search engine results." {...field} />
+                          </FormControl>
+                           <FormDescription>
+                            Maximum 160 characters.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="metaKeywords"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Meta Keywords</FormLabel>
+                          <FormControl>
+                            <Input placeholder="keyword1, keyword2, keyword3" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Comma-separated keywords related to the page content.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormField
+                        control={form.control}
+                        name="author"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Author</FormLabel>
+                            <FormControl>
+                              <Input placeholder="John Doe" {...field} />
+                            </FormControl>
+                             <FormDescription>The author of this page.</FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="publisher"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Publisher</FormLabel>
+                            <FormControl>
+                              <Input placeholder="QAWala" {...field} />
+                            </FormControl>
+                            <FormDescription>The publisher of this page.</FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
           </div>
 
           <div className="space-y-6">

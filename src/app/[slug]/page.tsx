@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { collection, query, where, getDocs, limit, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Card, CardContent } from '@/components/ui/card';
-import type { Metadata } from 'next';
+import type { Metadata, ResolvingMetadata } from 'next';
 
 type Page = {
   id: string;
@@ -13,6 +13,10 @@ type Page = {
   slug: string;
   status: 'draft' | 'published';
   password?: string;
+  seoDescription?: string;
+  metaKeywords?: string;
+  author?: string;
+  publisher?: string;
 };
 
 async function getPage(slug: string): Promise<Page | null> {
@@ -24,6 +28,7 @@ async function getPage(slug: string): Promise<Page | null> {
       content: `<p>Of course. I understand that you want to refine the behavior of the sidebar toggle button. Your goal is to ensure that clicking the PanelLeft icon correctly collapses and expands the admin sidebar, showing only icons when collapsed.</p><p>Based on your request, I will adjust the AdminSidebar component to ensure the toggle functionality works as intended, cleanly switching between the expanded and collapsed states.</p><p>Here are the changes I'll make:</p>`,
       createdAt: Timestamp.now(),
       slug: 'test',
+      seoDescription: "test",
       status: 'published',
     };
   }
@@ -48,21 +53,49 @@ async function getPage(slug: string): Promise<Page | null> {
   return pageData;
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params;
+type Props = {
+    params: { slug: string };
+    searchParams: { [key: string]: string | string[] | undefined };
+};
+
+export async function generateMetadata({ params }: Props, parent: ResolvingMetadata): Promise<Metadata> {
+  const slug = params.slug;
   const page = await getPage(slug);
+  
   if (!page) {
     return {
       title: 'Page Not Found',
     };
   }
+
+  const previousImages = (await parent).openGraph?.images || [];
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://harshshrmaqas.netlify.app';
+
+
   return {
     title: page.title,
+    description: page.seoDescription || page.title,
+    keywords: page.metaKeywords,
+    authors: page.author ? [{ name: page.author }] : [],
+    publisher: page.publisher,
+    alternates: {
+      canonical: `${siteUrl}/${page.slug}`,
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+    openGraph: {
+      title: page.title,
+      description: page.seoDescription || page.title,
+      url: `${siteUrl}/${page.slug}`,
+      images: previousImages,
+    },
   };
 }
 
-export default async function CustomPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default async function CustomPage({ params }: Props) {
+  const { slug } = params;
   const page = await getPage(slug);
 
   if (!page) {

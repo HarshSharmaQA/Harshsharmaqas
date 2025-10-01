@@ -6,6 +6,10 @@ import type { Course } from '@/lib/mock-data';
 import { CourseDetails } from './course-details';
 import type { Metadata, ResolvingMetadata } from 'next';
 
+type CourseDetailPageProps = {
+  params: { slug: string };
+};
+
 async function getCourse(slug: string): Promise<Course | null> {
   const q = query(collection(db, 'courses'), where('slug', '==', slug), limit(1));
   const querySnapshot = await getDocs(q);
@@ -19,7 +23,7 @@ async function getCourse(slug: string): Promise<Course | null> {
 }
 
 export async function generateMetadata(
-  { params }: { params: { slug: string } },
+  { params }: CourseDetailPageProps,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   const course = await getCourse(params.slug);
@@ -34,7 +38,7 @@ export async function generateMetadata(
   };
 }
 
-export default async function CourseDetailPage({ params }: { params: { slug: string } }) {
+export default async function CourseDetailPage({ params }: CourseDetailPageProps) {
   const course = await getCourse(params.slug);
 
   if (!course) {

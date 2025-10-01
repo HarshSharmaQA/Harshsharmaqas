@@ -4,11 +4,23 @@ import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Course } from '@/lib/mock-data';
 import { CourseDetails } from './course-details';
-import type { Metadata, ResolvingMetadata } from 'next';
+import type { Metadata } from 'next';
 
-type Props = {
-  params: { slug: string };
+// The props for a dynamic page in this project's specific configuration expect
+// the params to be a Promise. This type definition reflects that.
+// We also add generateStaticParams to be consistent with the working blog page.
+
+type CourseDetailPageProps = {
+    params: { slug: string };
 };
+
+export async function generateStaticParams() {
+    const coursesSnapshot = await getDocs(collection(db, 'courses'));
+    return coursesSnapshot.docs.map(doc => ({
+        slug: doc.data().slug,
+    }));
+}
+
 
 async function getCourse(slug: string): Promise<Course | null> {
   const q = query(collection(db, 'courses'), where('slug', '==', slug), limit(1));
@@ -22,11 +34,11 @@ async function getCourse(slug: string): Promise<Course | null> {
   return courseDoc.data() as Course;
 }
 
-export async function generateMetadata(
-  { params }: Props,
-  parent: ResolvingMetadata
-): Promise<Metadata> {
-  const course = await getCourse(params.slug);
+// Replicating the blog's metadata function structure and the `await params` pattern
+export async function generateMetadata({ params }: CourseDetailPageProps): Promise<Metadata> {
+  const awaitedParams = await params;
+  const course = await getCourse(awaitedParams.slug);
+
   if (!course) {
     return {
       title: 'Course Not Found',
@@ -38,8 +50,10 @@ export async function generateMetadata(
   };
 }
 
-export default async function CourseDetailPage({ params }: Props) {
-  const course = await getCourse(params.slug);
+// Replicating the blog's page component structure and the `await params` pattern
+export default async function CourseDetailPage({ params }: CourseDetailPageProps) {
+  const awaitedParams = await params;
+  const course = await getCourse(awaitedParams.slug);
 
   if (!course) {
     notFound();

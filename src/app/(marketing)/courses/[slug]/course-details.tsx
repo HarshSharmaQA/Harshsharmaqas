@@ -21,7 +21,10 @@ export function CourseDetails({ course }: { course: Course }) {
   const imageUrl = course.imageUrl || placeholderImage?.imageUrl || fallbackImage?.imageUrl || "https://picsum.photos/seed/course/800/450";
   const imageHint = placeholderImage?.imageHint || 'course banner';
 
-  const instructorImage = PlaceHolderImages.find(img => img.id === 'instructor-avatar');
+  const defaultInstructorImage = PlaceHolderImages.find(img => img.id === 'instructor-avatar');
+  const instructorImageUrl = course.instructorImageUrl || defaultInstructorImage?.imageUrl;
+  const instructorImageHint = defaultInstructorImage?.imageHint || 'instructor avatar';
+
 
   const handleEnrollmentSuccess = () => {
     setIsEnrollDialogOpen(false);
@@ -40,9 +43,9 @@ export function CourseDetails({ course }: { course: Course }) {
             
             {/* Instructor Info */}
             <div className="flex items-center gap-4 mb-12">
-              {instructorImage && (
+              {instructorImageUrl && (
                 <Avatar className="h-16 w-16">
-                  <AvatarImage src={instructorImage.imageUrl} alt={course.instructor} data-ai-hint={instructorImage.imageHint} />
+                  <AvatarImage src={instructorImageUrl} alt={course.instructor} data-ai-hint={instructorImageHint} />
                   <AvatarFallback>{course.instructor.charAt(0)}</AvatarFallback>
                 </Avatar>
               )}

@@ -35,6 +35,7 @@ const courseSchema = z.object({
   slug: z.string().min(5, 'Slug must be at least 5 characters.').regex(/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens.'),
   description: z.string().min(20, 'Description must be at least 20 characters.'),
   instructor: z.string().min(3, 'Instructor name is required.'),
+  instructorImageUrl: z.string().url().optional().or(z.literal('')),
   price: z.coerce.number().min(0, 'Price must be a positive number.'),
   duration: z.string().min(1, 'Duration is required.'),
   level: z.enum(['Beginner', 'Intermediate', 'Advanced']),
@@ -58,6 +59,7 @@ export default function EditCoursePage() {
       slug: '',
       description: '',
       instructor: '',
+      instructorImageUrl: '',
       price: 0,
       duration: '',
       level: 'Beginner',
@@ -124,6 +126,7 @@ export default function EditCoursePage() {
   };
   
   const imageUrl = form.watch('imageUrl');
+  const instructorImageUrl = form.watch('instructorImageUrl');
 
   return (
     <div className="space-y-8">
@@ -314,6 +317,22 @@ export default function EditCoursePage() {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="instructorImageUrl"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Instructor Image</FormLabel>
+                        <FormControl>
+                            <ImageUploader 
+                            onUrlChange={(url) => form.setValue('instructorImageUrl', url, { shouldDirty: true })}
+                            initialUrl={instructorImageUrl}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
                   <FormField
                     control={form.control}
                     name="imageUrl"

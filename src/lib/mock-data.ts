@@ -5,6 +5,7 @@ export type Course = {
   title: string;
   description: string;
   instructor: string;
+  instructorImageUrl?: string;
   price: number;
   duration: string;
   level: 'Beginner' | 'Intermediate' | 'Advanced';

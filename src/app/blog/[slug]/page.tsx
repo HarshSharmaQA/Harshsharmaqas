@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
 import { type BlogPost } from '@/app/admin/blogs/page';
-import loading from './loading';
 import {
   Accordion,
   AccordionContent,

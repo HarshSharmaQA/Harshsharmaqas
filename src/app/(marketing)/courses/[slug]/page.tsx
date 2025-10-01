@@ -31,7 +31,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function CourseDetailPage({ params }: { params: { slug: string } }) {
+interface CourseDetailPageProps {
+  params: {
+    slug: string;
+  };
+}
+
+export default async function CourseDetailPage({ params }: CourseDetailPageProps) {
   const course = await getCourse(params.slug);
 
   if (!course) {

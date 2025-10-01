@@ -48,8 +48,9 @@ async function getPage(slug: string): Promise<Page | null> {
   return pageData;
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const page = await getPage(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const page = await getPage(slug);
   if (!page) {
     return {
       title: 'Page Not Found',
@@ -60,8 +61,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function CustomPage({ params }: { params: { slug: string } }) {
-  const page = await getPage(params.slug);
+export default async function CustomPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const page = await getPage(slug);
 
   if (!page) {
     notFound();

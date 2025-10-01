@@ -1,6 +1,6 @@
 
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, writeBatch, getDocs, deleteDoc } from 'firebase/firestore';
+import { getFirestore, collection, writeBatch, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { config } from 'dotenv';
 
 // Load environment variables from .env.local
@@ -52,7 +52,7 @@ async function seedDatabase() {
   // Add each course to the batch
   courses.forEach((course) => {
     // Firestore will auto-generate an ID if you don't specify one
-    const docRef = collection(db, 'courses').doc(course.slug);
+    const docRef = doc(db, 'courses', course.slug);
     batch.set(docRef, course);
   });
 

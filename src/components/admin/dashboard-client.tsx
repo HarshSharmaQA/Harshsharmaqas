@@ -32,18 +32,19 @@ import { useEffect, useState } from 'react';
 import { getDashboardData, type DashboardData } from '@/lib/data';
 import { Skeleton } from '../ui/skeleton';
 
+interface SerializableBlogPost extends Omit<BlogPost, 'createdAt'> {
+  createdAt: string;
+}
 interface DashboardClientProps {
-  initialData: DashboardData | null;
+  initialData: (Omit<DashboardData, 'recentPosts'> & { recentPosts: SerializableBlogPost[] }) | null;
 }
 
 export function DashboardClient({ initialData }: DashboardClientProps) {
-  const [data, setData] = useState<DashboardData | null>(initialData);
+  const [data, setData] = useState(initialData);
   const [loading, setLoading] = useState(!initialData);
 
   useEffect(() => {
     if (!initialData) {
-      // This part is for safety, in case server-side fetch fails,
-      // but with the new structure it should not be needed in normal operation.
       setLoading(true);
       getDashboardData().then((fetchedData) => {
         setData(fetchedData);
@@ -192,7 +193,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
                         </div>
                     ))
                 ) : data?.recentPosts && data.recentPosts.length > 0 ? (
-                    data.recentPosts.map((post: BlogPost) => (
+                    data.recentPosts.map((post: SerializableBlogPost) => (
                     <div key={post.id} className="flex items-center gap-4">
                         <div className="flex-shrink-0">
                             <Newspaper className="h-5 w-5 text-muted-foreground" />
@@ -201,7 +202,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
                         <p className="text-sm font-medium leading-tight truncate">{post.title}</p>
                         <p className="text-xs text-muted-foreground">
                             {post.createdAt
-                            ? format(post.createdAt.toDate(), 'MMMM d, yyyy')
+                            ? format(new Date(post.createdAt), 'MMMM d, yyyy')
                             : 'Just now'}
                         </p>
                         </div>

@@ -26,13 +26,18 @@ type SiteSettings = {
   siteName: string;
 };
 
+// Update BlogPost type to use string for createdAt
+interface SerializableBlogPost extends Omit<BlogPost, 'createdAt'> {
+  createdAt: string;
+}
+
 export interface DashboardData {
   totalCourses: number;
   totalRevenue: number;
   totalBlogs: number;
   totalTestimonials: number;
   chartData: { name: string; sales: number }[];
-  recentPosts: BlogPost[];
+  recentPosts: SerializableBlogPost[];
 }
 
 async function getRecentPostsHomepage() {
@@ -83,28 +88,21 @@ export async function getDashboardData(): Promise<DashboardData> {
     ]);
 
   const courses = courseSnapshot.docs.map(doc => doc.data() as Course);
-  // Convert Timestamp to a serializable format (string)
-  const recentPosts = blogSnapshot.docs.map(doc => {
+  
+  const recentPosts: SerializableBlogPost[] = blogSnapshot.docs.map(doc => {
       const data = doc.data();
-      // Firestore timestamps need to be converted to a serializable format for client components
-      const createdAt = data.createdAt instanceof Timestamp ? data.createdAt : new Timestamp(data.createdAt.seconds, data.createdAt.nanoseconds);
+      const createdAt = data.createdAt as Timestamp;
       
-      const post: BlogPost = {
+      const post = {
+        ...data,
         id: doc.id,
-        title: data.title,
-        slug: data.slug,
-        author: data.author,
-        category: data.category,
-        seoDescription: data.seoDescription,
-        createdAt: createdAt,
-      };
+        createdAt: createdAt.toDate().toISOString(), // Convert Timestamp to ISO string
+      } as SerializableBlogPost;
 
-      if (data.featureImageUrl) {
-        post.featureImageUrl = data.featureImageUrl;
-      }
-       if (data.faqs) {
-        post.faqs = data.faqs;
-      }
+      // Ensure optional fields are handled
+      if (!data.featureImageUrl) delete post.featureImageUrl;
+      if (!data.faqs) delete post.faqs;
+      
       return post;
   });
 

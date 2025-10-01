@@ -91,7 +91,7 @@ export default function AdminSidebar() {
           </React.Suspense>
           <span className="font-bold font-headline text-lg">QAWala</span>
         </Link>
-        <Button variant="ghost" size="icon" onClick={toggleSidebar} className={cn(state === 'collapsed' && 'mx-auto')}>
+        <Button variant="ghost" size="icon" onClick={toggleSidebar} className={cn(state === 'collapsed' ? 'mx-auto' : '')}>
           <React.Suspense fallback={<IconLoadingSkeleton />}>
             <PanelLeft />
           </React.Suspense>

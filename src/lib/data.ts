@@ -29,6 +29,7 @@ type SiteSettings = {
 // Update BlogPost type to use string for createdAt
 interface SerializableBlogPost extends Omit<BlogPost, 'createdAt'> {
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface DashboardData {
@@ -91,19 +92,21 @@ export async function getDashboardData(): Promise<DashboardData> {
   
   const recentPosts: SerializableBlogPost[] = blogSnapshot.docs.map(doc => {
       const data = doc.data();
-      const createdAt = data.createdAt as Timestamp;
+      const post: any = { ...data, id: doc.id };
+
+      if (data.createdAt && data.createdAt instanceof Timestamp) {
+        post.createdAt = data.createdAt.toDate().toISOString();
+      }
       
-      const post = {
-        ...data,
-        id: doc.id,
-        createdAt: createdAt.toDate().toISOString(), // Convert Timestamp to ISO string
-      } as SerializableBlogPost;
+      if (data.updatedAt && data.updatedAt instanceof Timestamp) {
+        post.updatedAt = data.updatedAt.toDate().toISOString();
+      }
 
       // Ensure optional fields are handled
       if (!data.featureImageUrl) delete post.featureImageUrl;
       if (!data.faqs) delete post.faqs;
       
-      return post;
+      return post as SerializableBlogPost;
   });
 
 
@@ -140,3 +143,4 @@ export async function getDashboardData(): Promise<DashboardData> {
     recentPosts,
   };
 }
+

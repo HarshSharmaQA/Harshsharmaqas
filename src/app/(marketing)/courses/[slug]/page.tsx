@@ -6,10 +6,6 @@ import type { Course } from '@/lib/mock-data';
 import { CourseDetails } from './course-details';
 import type { Metadata } from 'next';
 
-// The props for a dynamic page in this project's specific configuration expect
-// the params to be a Promise. This type definition reflects that.
-// We also add generateStaticParams to be consistent with the working blog page.
-
 type CourseDetailPageProps = {
     params: { slug: string };
 };
@@ -34,10 +30,8 @@ async function getCourse(slug: string): Promise<Course | null> {
   return courseDoc.data() as Course;
 }
 
-// Replicating the blog's metadata function structure and the `await params` pattern
 export async function generateMetadata({ params }: CourseDetailPageProps): Promise<Metadata> {
-  const awaitedParams = await params;
-  const course = await getCourse(awaitedParams.slug);
+  const course = await getCourse(params.slug);
 
   if (!course) {
     return {
@@ -50,10 +44,8 @@ export async function generateMetadata({ params }: CourseDetailPageProps): Promi
   };
 }
 
-// Replicating the blog's page component structure and the `await params` pattern
 export default async function CourseDetailPage({ params }: CourseDetailPageProps) {
-  const awaitedParams = await params;
-  const course = await getCourse(awaitedParams.slug);
+  const course = await getCourse(params.slug);
 
   if (!course) {
     notFound();

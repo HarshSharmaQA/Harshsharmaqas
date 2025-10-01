@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -29,8 +30,9 @@ export function CourseDetails({ course }: { course: Course }) {
 
   return (
     <>
-      <div className="container py-12 md:py-20">
+      <div className="container py-12 md:py-20 px-4 md:px-6">
         <div className="grid lg:grid-cols-3 gap-12">
+          
           {/* Main Content */}
           <div className="lg:col-span-2">
             <h1 className="text-4xl md:text-5xl font-bold font-headline mb-4">{course.title}</h1>
@@ -69,7 +71,7 @@ export function CourseDetails({ course }: { course: Course }) {
           </div>
 
           {/* Sticky Sidebar Card */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 order-first lg:order-last">
             <div className="sticky top-28">
               <Card className="shadow-lg">
                 <CardHeader className="p-0">

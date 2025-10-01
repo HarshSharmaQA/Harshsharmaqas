@@ -1500,6 +1500,9 @@ video {
 .order-last {
   order: 9999;
 }
+.order-first {
+  order: -9999;
+}
 .-mx-1 {
   margin-left: -0.25rem;
   margin-right: -0.25rem;
@@ -3741,6 +3744,11 @@ video {
     padding-bottom: 8rem;
   }
 
+  .md\:px-6 {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
   .md\:text-4xl {
     font-size: 2.25rem;
     line-height: 2.5rem;
@@ -3799,6 +3807,14 @@ video {
 }
 
 @media (min-width: 1024px) {
+
+  .lg\:order-first {
+    order: -9999;
+  }
+
+  .lg\:order-last {
+    order: 9999;
+  }
 
   .lg\:col-span-2 {
     grid-column: span 2 / span 2;

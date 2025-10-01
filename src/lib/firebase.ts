@@ -5,27 +5,26 @@ import { getAnalytics, isSupported } from "firebase/analytics";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDmOi5flMyV0VKmuxrAKnPha9iDKT3Dl3M",
-  authDomain: "jobwalaqa.firebaseapp.com",
-  projectId: "jobwalaqa",
-  storageBucket: "jobwalaqa.appspot.com",
-  messagingSenderId: "1072396490172",
-  appId: "1:1072396490172:web:7f6b5b5b4b1b3b5d4e4b7b",
-  measurementId: "G-K1VTG7MBJT"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 
-// Initialize Analytics if it's supported, but don't block app load
+// Initialize Analytics if it's supported
 if (typeof window !== 'undefined') {
   isSupported().then(supported => {
-    if (supported && firebaseConfig.measurementId) { 
+    if (supported && firebaseConfig.measurementId) {
       getAnalytics(app);
     }
   });
 }
-
 
 export { app, db };

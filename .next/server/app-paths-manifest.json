@@ -1,8 +1,9 @@
 {
-  "/login/page": "app/login/page.js",
-  "/(marketing)/page": "app/(marketing)/page.js",
-  "/(marketing)/courses/[slug]/page": "app/(marketing)/courses/[slug]/page.js",
-  "/(marketing)/courses/page": "app/(marketing)/courses/page.js",
-  "/blog/page": "app/blog/page.js",
-  "/blog/[slug]/page": "app/blog/[slug]/page.js"
+  "/admin/page": "app/admin/page.js",
+  "/admin/pages/page": "app/admin/pages/page.js",
+  "/admin/pages/[id]/edit/page": "app/admin/pages/[id]/edit/page.js",
+  "/admin/blogs/page": "app/admin/blogs/page.js",
+  "/admin/blogs/[id]/edit/page": "app/admin/blogs/[id]/edit/page.js",
+  "/[slug]/page": "app/[slug]/page.js",
+  "/(marketing)/page": "app/(marketing)/page.js"
 }

@@ -54,12 +54,12 @@ async function getPage(slug: string): Promise<Page | null> {
 }
 
 type Props = {
-    params: { slug: string };
+    params: Promise<{ slug: string }>;
     searchParams: { [key: string]: string | string[] | undefined };
 };
 
 export async function generateMetadata({ params }: Props, parent: ResolvingMetadata): Promise<Metadata> {
-  const slug = params.slug;
+  const { slug } = await params;
   const page = await getPage(slug);
   
   if (!page) {
@@ -95,7 +95,7 @@ export async function generateMetadata({ params }: Props, parent: ResolvingMetad
 }
 
 export default async function CustomPage({ params }: Props) {
-  const { slug } = params;
+  const { slug } = await params;
   const page = await getPage(slug);
 
   if (!page) {

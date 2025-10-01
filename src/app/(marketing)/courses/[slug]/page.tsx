@@ -4,7 +4,12 @@ import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Course } from '@/lib/mock-data';
 import { CourseDetails } from './course-details';
-import type { Metadata } from 'next';
+import type { Metadata, ResolvingMetadata } from 'next';
+
+type Props = {
+  params: { slug: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+};
 
 async function getCourse(slug: string): Promise<Course | null> {
   const q = query(collection(db, 'courses'), where('slug', '==', slug), limit(1));
@@ -18,7 +23,7 @@ async function getCourse(slug: string): Promise<Course | null> {
   return courseDoc.data() as Course;
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: Props, parent: ResolvingMetadata): Promise<Metadata> {
   const course = await getCourse(params.slug);
   if (!course) {
     return {
@@ -31,13 +36,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-interface CourseDetailPageProps {
-  params: {
-    slug: string;
-  };
-}
-
-export default async function CourseDetailPage({ params }: CourseDetailPageProps) {
+export default async function CourseDetailPage({ params }: Props) {
   const course = await getCourse(params.slug);
 
   if (!course) {

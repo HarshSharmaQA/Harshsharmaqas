@@ -43,11 +43,11 @@ export default async function BlogPage() {
             <p className="text-muted-foreground">Check back soon for our latest articles!</p>
           </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
           {posts.map((post) => {
               const imageUrl = post.featureImageUrl || fallbackImage?.imageUrl || "https://picsum.photos/seed/blog/400/250";
               return (
-            <Card key={post.id} className="flex flex-col shadow-md hover:shadow-xl transition-shadow duration-300 group">
+            <Card key={post.id} className="flex flex-col shadow-md hover:shadow-xl transition-shadow duration-300 group max-w-md">
               <div className="overflow-hidden rounded-t-lg">
                 <Link href={`/blog/${post.slug}`}>
                   <Image

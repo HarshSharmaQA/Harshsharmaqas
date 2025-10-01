@@ -31,6 +31,17 @@
         "app/(marketing)/page": "rsc",
         "app/admin/page": "rsc"
       }
+    },
+    "4074d52816b3764755ca64e3c37c9f054dbff6a3b9": {
+      "workers": {
+        "app/admin/content/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Fuser%2Fstudio%2Fsrc%2Fai%2Fflows%2Fcontent-paraphrasing.ts%22%2C%5B%7B%22id%22%3A%224074d52816b3764755ca64e3c37c9f054dbff6a3b9%22%2C%22exportedName%22%3A%22paraphraseContent%22%7D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/admin/content/page": "action-browser"
+      }
     }
   },
   "edge": {},

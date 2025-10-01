@@ -2,18 +2,22 @@
   "node": {
     "5be3d076060cce49ffebfeef9dc9bc7354ffee56": {
       "workers": {
-        "app/(marketing)/page": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Fuser%2Fstudio%2Fsrc%2Flib%2Fdata.ts%22%2C%5B%22getDashboardData%22%2C%22getHomepageData%22%5D%5D%5D&__client_imported__=!"
+        "app/(marketing)/page": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Fuser%2Fstudio%2Fsrc%2Flib%2Fdata.ts%22%2C%5B%22getDashboardData%22%2C%22getHomepageData%22%5D%5D%5D&__client_imported__=!",
+        "app/admin/page": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Fuser%2Fstudio%2Fsrc%2Flib%2Fdata.ts%22%2C%5B%22getDashboardData%22%2C%22getHomepageData%22%5D%5D%5D&__client_imported__=!"
       },
       "layer": {
-        "app/(marketing)/page": "rsc"
+        "app/(marketing)/page": "rsc",
+        "app/admin/page": "rsc"
       }
     },
     "9f359753b1deda6b53b639c8e972e94f77fb8930": {
       "workers": {
-        "app/(marketing)/page": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Fuser%2Fstudio%2Fsrc%2Flib%2Fdata.ts%22%2C%5B%22getDashboardData%22%2C%22getHomepageData%22%5D%5D%5D&__client_imported__=!"
+        "app/(marketing)/page": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Fuser%2Fstudio%2Fsrc%2Flib%2Fdata.ts%22%2C%5B%22getDashboardData%22%2C%22getHomepageData%22%5D%5D%5D&__client_imported__=!",
+        "app/admin/page": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Fuser%2Fstudio%2Fsrc%2Flib%2Fdata.ts%22%2C%5B%22getDashboardData%22%2C%22getHomepageData%22%5D%5D%5D&__client_imported__=!"
       },
       "layer": {
-        "app/(marketing)/page": "rsc"
+        "app/(marketing)/page": "rsc",
+        "app/admin/page": "rsc"
       }
     }
   },

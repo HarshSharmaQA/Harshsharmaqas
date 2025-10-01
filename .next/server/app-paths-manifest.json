@@ -1,5 +1,11 @@
 {
-  "/[slug]/page": "app/[slug]/page.js",
-  "/blog/[slug]/page": "app/blog/[slug]/page.js",
-  "/(marketing)/page": "app/(marketing)/page.js"
+  "/admin/page": "app/admin/page.js",
+  "/(marketing)/courses/page": "app/(marketing)/courses/page.js",
+  "/(marketing)/courses/[slug]/page": "app/(marketing)/courses/[slug]/page.js",
+  "/(marketing)/page": "app/(marketing)/page.js",
+  "/admin/blogs/page": "app/admin/blogs/page.js",
+  "/admin/pages/page": "app/admin/pages/page.js",
+  "/admin/seo/page": "app/admin/seo/page.js",
+  "/admin/courses/page": "app/admin/courses/page.js",
+  "/admin/courses/[slug]/edit/page": "app/admin/courses/[slug]/edit/page.js"
 }

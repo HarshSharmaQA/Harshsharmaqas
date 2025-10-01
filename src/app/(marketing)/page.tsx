@@ -78,6 +78,7 @@ export default async function HomePage() {
                   height={350}
                   className="rounded-full object-cover aspect-square shadow-2xl"
                   data-ai-hint={heroImageHint}
+                  priority
                 />
               )}
             </div>

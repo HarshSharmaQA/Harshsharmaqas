@@ -19,6 +19,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { Suspense } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 async function getPost(slug: string): Promise<BlogPost | null> {
   const q = query(collection(db, 'blogs'), where('slug', '==', slug), limit(1));
@@ -45,6 +47,80 @@ async function getRelatedPosts(category: string, currentPostId: string): Promise
         .filter(post => post.id !== currentPostId);
 
     return posts.slice(0, 3); // Return at most 3 related posts
+}
+
+async function RelatedPosts({ category, currentPostId }: { category: string; currentPostId: string }) {
+  const relatedPosts = await getRelatedPosts(category, currentPostId);
+  const fallbackImage = PlaceHolderImages.find(img => img.id === 'course-detail-banner');
+
+  if (relatedPosts.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="mt-16 md:mt-24 border-t pt-12">
+      <h2 className="text-3xl font-bold font-headline text-center mb-12">Related Posts</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {relatedPosts.map((relatedPost) => {
+          const relatedImageUrl = relatedPost.featureImageUrl || fallbackImage?.imageUrl || "https://picsum.photos/seed/blog/400/250";
+          return (
+            <Card key={relatedPost.id} className="flex flex-col shadow-md hover:shadow-xl transition-shadow duration-300 group bg-card">
+              <Link href={`/blog/${relatedPost.slug}`} className="block overflow-hidden rounded-t-lg">
+                <Image
+                  src={relatedImageUrl}
+                  alt={relatedPost.altText || relatedPost.title}
+                  width={400}
+                  height={250}
+                  className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-105"
+                  data-ai-hint="blog post image"
+                />
+              </Link>
+              <CardHeader>
+                <CardTitle className="font-headline text-xl">
+                  <Link href={`/blog/${relatedPost.slug}`}>{relatedPost.title}</Link>
+                </CardTitle>
+                <CardDescription>
+                  {relatedPost.createdAt ? format(new Date(relatedPost.createdAt.seconds * 1000), 'MMMM d, yyyy') : ''}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex-grow flex flex-col">
+                <p className="text-muted-foreground mb-4 flex-grow text-sm">{relatedPost.seoDescription}</p>
+                <Button asChild variant="outline" className="mt-auto">
+                  <Link href={`/blog/${relatedPost.slug}`}>
+                    Read More <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function RelatedPostsSkeleton() {
+    return (
+        <section className="mt-16 md:mt-24 border-t pt-12">
+            <h2 className="text-3xl font-bold font-headline text-center mb-12">Related Posts</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {Array.from({ length: 3 }).map((_, i) => (
+                    <Card key={i} className="flex flex-col shadow-md">
+                        <Skeleton className="h-52 w-full" />
+                        <CardHeader>
+                            <Skeleton className="h-6 w-3/4" />
+                            <Skeleton className="h-4 w-1/2 mt-2" />
+                        </CardHeader>
+                        <CardContent className="flex-grow">
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-full mt-2" />
+                            <Skeleton className="h-4 w-2/3 mt-2" />
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+        </section>
+    );
 }
 
 export async function generateStaticParams() {
@@ -140,7 +216,6 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
     notFound();
   }
 
-  const relatedPosts = post.category ? await getRelatedPosts(post.category, post.id) : [];
   const fallbackImage = PlaceHolderImages.find(img => img.id === 'course-detail-banner');
   const imageUrl = post.featureImageUrl || fallbackImage?.imageUrl || "https://picsum.photos/seed/blog-detail/1200/600";
 
@@ -190,46 +265,12 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
             </section>
           )}
 
-          {relatedPosts.length > 0 && (
-              <section className="mt-16 md:mt-24 border-t pt-12">
-                  <h2 className="text-3xl font-bold font-headline text-center mb-12">Related Posts</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                      {relatedPosts.map((relatedPost) => {
-                          const relatedImageUrl = relatedPost.featureImageUrl || fallbackImage?.imageUrl || "https://picsum.photos/seed/blog/400/250";
-                          return (
-                              <Card key={relatedPost.id} className="flex flex-col shadow-md hover:shadow-xl transition-shadow duration-300 group bg-card">
-                                  <Link href={`/blog/${relatedPost.slug}`} className="block overflow-hidden rounded-t-lg">
-                                  <Image
-                                      src={relatedImageUrl}
-                                      alt={relatedPost.altText || relatedPost.title}
-                                      width={400}
-                                      height={250}
-                                      className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-105"
-                                      data-ai-hint="blog post image"
-                                  />
-                                  </Link>
-                                  <CardHeader>
-                                      <CardTitle className="font-headline text-xl">
-                                          <Link href={`/blog/${relatedPost.slug}`}>{relatedPost.title}</Link>
-                                      </CardTitle>
-                                      <CardDescription>
-                                          {relatedPost.createdAt ? format(new Date(relatedPost.createdAt.seconds * 1000), 'MMMM d, yyyy') : ''}
-                                      </CardDescription>
-                                  </CardHeader>
-                                  <CardContent className="flex-grow flex flex-col">
-                                      <p className="text-muted-foreground mb-4 flex-grow text-sm">{relatedPost.seoDescription}</p>
-                                      <Button asChild variant="outline" className="mt-auto">
-                                          <Link href={`/blog/${relatedPost.slug}`}>
-                                          Read More <ArrowRight className="ml-2 h-4 w-4" />
-                                          </Link>
-                                      </Button>
-                                  </CardContent>
-                              </Card>
-                          );
-                      })}
-                  </div>
-              </section>
+          {post.category && (
+            <Suspense fallback={<RelatedPostsSkeleton />}>
+              <RelatedPosts category={post.category} currentPostId={post.id} />
+            </Suspense>
           )}
+
       </div>
     </div>
   );

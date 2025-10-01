@@ -6,9 +6,9 @@ import type { Course } from '@/lib/mock-data';
 import { CourseDetails } from './course-details';
 import type { Metadata } from 'next';
 
-type Props = {
-    params: { slug: string };
-};
+
+// This project's non-standard build process requires `params` to be a `Promise`.
+// This type annotation aligns with the build system's expectation, allowing `await params` to be correctly typed.
 
 export async function generateStaticParams() {
     const coursesSnapshot = await getDocs(collection(db, 'courses'));
@@ -30,8 +30,9 @@ async function getCourse(slug: string): Promise<Course | null> {
   return courseDoc.data() as Course;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const course = await getCourse(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const course = await getCourse(slug);
 
   if (!course) {
     return {
@@ -44,8 +45,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function CourseDetailPage({ params }: Props) {
-  const course = await getCourse(params.slug);
+export default async function CourseDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const course = await getCourse(slug);
 
   if (!course) {
     notFound();

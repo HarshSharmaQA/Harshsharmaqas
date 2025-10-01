@@ -34,14 +34,14 @@ export default async function CoursesPage() {
           <p>Courses are being prepared. Check back soon!</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
           {courses.map((course) => {
             const placeholderImage = course.imageId ? PlaceHolderImages.find((img) => img.id === course.imageId) : null;
             const imageUrl = course.imageUrl || placeholderImage?.imageUrl || fallbackImage?.imageUrl || "https://picsum.photos/seed/course/400/250";
             const imageHint = placeholderImage?.imageHint || 'course image';
 
             return (
-              <Card key={course.id} className="overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col group hover:-translate-y-2">
+              <Card key={course.id} className="overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col group hover:-translate-y-2 max-w-md">
                 <div className="overflow-hidden">
                     <Image
                       src={imageUrl}
